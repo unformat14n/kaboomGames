@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+  <title>kaboom</title>
+  <meta charset="utf-8">
+  <style>
+    * {
+      margin: 0;
+    }
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+    canvas {
+      display: block;
+    }
+    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+  </style>
+</head>
+
+<body>
+  <script src="https://kaboomjs.com/lib/0.5.0/kaboom.js"></script>
+  <script src="https://kaboomjs.com/lib/0.5.0/plugins/aseprite.js"></script>
+  <script src="https://kaboomjs.com/lib/0.5.0/plugins/pedit.js"></script>
+  <script src="https://kaboomjs.com/pub/legacy/kbmsprite.js"></script>
+  <!-- <script src="https://kaboomjs.com/lib/0.6.0/kaboom.js"></script> -->
+  <script src="https://unpkg.com/kaboom@next/dist/kaboom.js"></script>
+  <script>
+    kaboom({
+      ...{"fullscreen":true,"scale":2,"startScene":"main"},
+      global: true,
+      clearColor: [0, 0, 0, 1],
+      plugins: [ peditPlugin, asepritePlugin, kbmspritePlugin ],
+    });
+    loadSprite("player", "sprites/player.png", {
+      sliceX: 13.5,
+      sliceY: 3,
+      anims: {
+        idle: {from: 21, to: 24, loop: true, pingpong: true},
+        walk: {from: 32, to: 37, loop: true, pingpong: true},
+      }
+    })
+    loadSprite("tiles", "sprites/tileset-col.png", {
+      sliceX: 1,
+      sliceY: 2,
+    })
+  </script>
+  <script src="main.js"></script>
+</body>
+
+</html>
