@@ -1,11 +1,13 @@
-// debug.inspect = true;
+debug.inspect = true;
 
-const SPEED = 90;
-const JUMP_FORCE = 500;
+const music = play("main-theme", {loop: true, volume: 0.1})
+const SPEED = 100;
+const JUMP_FORCE = 550;
 
 scene("main", () => {
 
   layers([
+    "bg",
     "enviroment",
     "enemies",
     "effects",
@@ -13,27 +15,50 @@ scene("main", () => {
     "ui",
   ])
 
+  const background = [
+    add([
+      sprite("background"),
+      layer("bg"),
+      scale(2, 3.5),
+      pos(205, 200),
+      origin("center"),
+      fixed(),
+    ]),
+    add([
+      sprite("background"),
+      layer("bg"),
+      scale(2, 3.5),
+      pos(621, 200),
+      origin("center"),
+      fixed(),
+    ])
+  ];
+
   const map = addLevel([
-    "                        ",
-    "                        ",
-    "                        ",
-    "                     w  ",
-    "              ==========",
-    "==============----------",
+    "                                            ",
+    "                                            ",
+    "                                            ",
+    "                     w                      ",
+    "              =================   w         ",
+    "==============----__----_-_---_========  ===",
   ], {
     width: 32,
     height: 32,
     "=": () => [
-      sprite("column1", {
-        frame: 0,
-      }),
+      sprite("platform1"),
       area(),
       solid(),
       layer("enviroment"),
     ],
     "-": () => [
-      sprite("column1", {
-        frame: 1,
+      sprite("platform2", {
+        frame: 0
+      }),
+      layer("enviroment"),
+    ],
+    "_": () => [
+      sprite("platform2", {
+        frame: 1
       }),
       layer("enviroment"),
     ],
@@ -42,7 +67,7 @@ scene("main", () => {
         anim: "walking",
         flipX: true,
       }),
-      area({scale: 0.6}),
+      area({width: 40, height: 30, offset: {x: 0, y: 5}}),
       origin("center"),
       body(),
       layer("enemies"),
@@ -58,8 +83,8 @@ scene("main", () => {
     ],
   })
 
-  camScale(vec2(1.5, 1.5));
-  camPos(230, 60)
+  camScale(vec2(2, 2));
+  camPos(180, 90)
 
   const player = add([
     sprite("arcane-archer", {
@@ -68,8 +93,8 @@ scene("main", () => {
     scale(),
     origin("center"),
     body(),
-    area({scale: 0.45}),
-    pos(400, 60),
+    area({scale: 0.3}),
+    pos(60, 60),
     layer("character"),
     {
       walking: false,
@@ -156,6 +181,7 @@ scene("main", () => {
     player.attacking = true;
     shootArrow(player.direction);
     wait(0.5, () => {play("bow-shoot", {volume: 0.2})})
+    wait(0.8, () => {player.attacking = false})
   })
 
   const handleAnimations = () => {
@@ -164,7 +190,6 @@ scene("main", () => {
       if(anim !== "attack"){
         player.animSpeed = 1;
         player.play("attack");
-        wait(0.8, () => {player.attacking = false})
       }
     }
     else if (player.falling){
@@ -197,7 +222,7 @@ scene("main", () => {
     }
 
     if(player.pos.x > 270){
-      camPos({x: player.pos.x, y: 60})
+      camPos({x: player.pos.x, y: 90})
     }
   })
 

@@ -46,10 +46,13 @@
         attack: {from: 24, to: 30},
       }
     })
-    loadSprite("column1", "sprites/tileset-column1.png", {
-      sliceX: 1,
-      sliceY: 2,
-    })
+    loadSprite("platform1", "sprites/platform1.png");
+    loadSprite("platform2", "sprites/platform2.png", {
+      sliceX: 2,
+      sliceY: 1,
+    });
+    loadSprite("platform3", "sprites/platform3.png");
+    loadSprite("background", "sprites/background.png");
     loadSprite("fire-worm", "sprites/worm-spritesheet.png", {
       sliceX: 9,
       sliceY: 2,
@@ -68,6 +71,7 @@
     loadSound("arrow-hit", "sounds/arrow-hit.wav");
     loadSound("bow-shoot", "sounds/shoot-arrow.wav");
     loadSound("worm-death", "sounds/worm-death.wav");
+    loadSound("main-theme", "sounds/main-theme.mp3");
   </script>
   <script src="main.js"></script>
 </body>

@@ -1,5 +1,7 @@
 # CHANGELOG.
 ### Thu 30 Sep:
+- Changed the style of the platforms
+- Added a new background music *Bipedal Mech*.
 - Added sounds for the player (`bow-shoot`, `arrow-hit`)
 - Added sounds for the *worm* (`worm-death`) 
 - Added a new animation for the player `attack`, now the player can *shoot arrows*.
