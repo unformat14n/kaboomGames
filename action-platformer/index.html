@@ -40,15 +40,34 @@
       sliceY: 8,
       anims:
       {
-        idle: {from: 41, to: 43, loop: true},
+        idle: {from: 41, to: 41},
         walk: {from: 0, to: 7, loop: true},
-        fall: {from: 55, to: 55},
+        fall: {from: 56, to: 56},
+        attack: {from: 24, to: 30},
       }
     })
     loadSprite("column1", "sprites/tileset-column1.png", {
       sliceX: 1,
       sliceY: 2,
     })
+    loadSprite("fire-worm", "sprites/worm-spritesheet.png", {
+      sliceX: 9,
+      sliceY: 2,
+      anims:
+      {
+        walking: {from: 0, to: 8, loop: true,},
+        death: {from: 9, to: 16,},
+      }
+    })
+    loadSprite("arrow", "sprites/projectile.png");
+    
+    /**********************************************************/
+    /*                    LOAD SOUNDS                         */
+    /**********************************************************/
+
+    loadSound("arrow-hit", "sounds/arrow-hit.wav");
+    loadSound("bow-shoot", "sounds/shoot-arrow.wav");
+    loadSound("worm-death", "sounds/worm-death.wav");
   </script>
   <script src="main.js"></script>
 </body>
