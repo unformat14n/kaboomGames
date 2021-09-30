@@ -51,7 +51,7 @@ keyDown("left", () => {
 keyDown("right", () => {
   player.move(SPEED, 0);
 })
-
+cd
 player.action(() => {
   if(keyIsReleased("left")){
     player.play("idle");
