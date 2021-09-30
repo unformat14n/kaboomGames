@@ -33,6 +33,7 @@
       ...{"fullscreen":true,"scale":2,"startScene":"main","version":"0.6.0"},
       global: true,
       background: [1, 1, 1],
+      font: "sinko",
       plugins: [ peditPlugin, asepritePlugin, kbmspritePlugin ],
     });
     loadSprite("arcane-archer", "sprites/arcane-archer.png", {
@@ -44,6 +45,8 @@
         walk: {from: 0, to: 7, loop: true},
         fall: {from: 56, to: 56},
         attack: {from: 24, to: 30},
+        hurt: {from: 8, to: 9},
+        death: {from: 8, to: 15},
       }
     })
     loadSprite("platform1", "sprites/platform1.png");
@@ -72,6 +75,9 @@
     loadSound("bow-shoot", "sounds/shoot-arrow.wav");
     loadSound("worm-death", "sounds/worm-death.wav");
     loadSound("main-theme", "sounds/main-theme.mp3");
+    loadSound("player-hit", "sounds/player-hit.wav");
+    loadSound("player-death", "sounds/player-death.wav");
+    loadSound("gameover", "sounds/game-over.wav");
   </script>
   <script src="main.js"></script>
 </body>

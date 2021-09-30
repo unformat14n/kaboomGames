@@ -1,6 +1,11 @@
 # CHANGELOG.
 ### Thu 30 Sep:
-- Changed the style of the platforms
+- Added a new sound *game over sound*.
+- Added a new scene, *Game over scene*. Press *enter* to play again.
+- Added **health** to the player (3 hits).
+- Added collisions between *worm* and *player*.
+- Added new animations for the player `hurt`, `death`.
+- Changed the style of the platforms.
 - Added a new background music *Bipedal Mech*.
 - Added sounds for the player (`bow-shoot`, `arrow-hit`)
 - Added sounds for the *worm* (`worm-death`) 

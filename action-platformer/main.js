@@ -1,10 +1,10 @@
-debug.inspect = true;
+// debug.inspect = true;
 
-const music = play("main-theme", {loop: true, volume: 0.1})
 const SPEED = 100;
 const JUMP_FORCE = 550;
 
 scene("main", () => {
+  const music = play("main-theme", {loop: true, volume: 0.1})
 
   layers([
     "bg",
@@ -96,10 +96,13 @@ scene("main", () => {
     area({scale: 0.3}),
     pos(60, 60),
     layer("character"),
+    health(3),
     {
       walking: false,
       falling: false,
       attacking: false,
+      hit: false,
+      death: false,
       direction: 1,
     }
   ])
@@ -138,7 +141,7 @@ scene("main", () => {
           sprite("arrow", {
             flipX: false,
           }),
-          pos(player.pos.x + 10, player.pos.y),
+          pos(player.pos.x + 30, player.pos.y - 5),
           area(),
           origin("center"),
           lifespan(3),
@@ -149,10 +152,10 @@ scene("main", () => {
           sprite("arrow", {
             flipX: true,
           }),
-          pos(player.pos.x - 10, player.pos.y),
+          pos(player.pos.x - 30, player.pos.y - 5),
           area(),
           origin("center"),
-          lifespan(3),
+          lifespan(1),
           layer("effects"), 
         ]);
       }
@@ -179,14 +182,28 @@ scene("main", () => {
 
   keyPress("a", () => {
     player.attacking = true;
-    shootArrow(player.direction);
     wait(0.5, () => {play("bow-shoot", {volume: 0.2})})
+    shootArrow(player.direction);
     wait(0.8, () => {player.attacking = false})
   })
 
   const handleAnimations = () => {
     const anim = player.curAnim();
-    if (player.attacking){
+    if (player.death){
+      if(anim !== "death"){
+        player.animSpeed = 1;
+        player.play("death");
+        wait(0.8, () => {destroy(player); go("gameover")})
+      }
+    }
+    else if (player.hit){
+      if(anim !== "hurt"){
+        player.animSpeed = 1;
+        player.play("hurt");
+        wait(0.1, () => {player.hit = false})
+      }
+    }
+    else if (player.attacking){
       if(anim !== "attack"){
         player.animSpeed = 1;
         player.play("attack");
@@ -212,6 +229,23 @@ scene("main", () => {
     }
   };
 
+  player.collides("enemy", () => {
+    player.hit = true;
+    play("player-hit", {volume: 0.2})
+    if(player.direction > 0){
+      player.moveBy(-50, 0);
+    }else {
+      player.moveBy(50, 0);
+    }
+    player.hurt(1);
+  })
+
+  player.on("death", () => {
+    player.death = true;
+    play("player-death", {volume: 0.2});
+    music.stop()
+  })
+
   player.action(() => {
     handleAnimations();
 
@@ -221,7 +255,7 @@ scene("main", () => {
       player.falling = true;
     }
 
-    if(player.pos.x > 270){
+    if(player.pos.x > 180){
       camPos({x: player.pos.x, y: 90})
     }
   })
@@ -251,5 +285,17 @@ scene("main", () => {
     })
   }
 });
+
+scene("gameover", () => {
+  play("gameover", {volume: 0.2})
+  add([
+    text("GAME OVER", {size: 50}),
+    pos(width()/2, height()/2),
+    origin("center"),
+  ])
+  keyPress("enter", () => {
+    go("main");
+  })
+})
 
 go("main"); 
