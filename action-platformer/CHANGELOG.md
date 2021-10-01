@@ -1,5 +1,6 @@
 # CHANGELOG.
 ### Thu 30 Sep:
+- Added a new enemy *spider* with its respective animations (there's some errors on the animations, working on it)
 - Added a new sound *game over sound*.
 - Added a new scene, *Game over scene*. Press *enter* to play again.
 - Added **health** to the player (3 hits).

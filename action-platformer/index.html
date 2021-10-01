@@ -66,6 +66,14 @@
       }
     })
     loadSprite("arrow", "sprites/projectile.png");
+    loadSprite("spider", "sprites/spider.png", {
+      sliceX: 10,
+      sliceY: 0,
+      anims: {
+        walk: {from: 0, to: 3, loop: true},
+        death: {from: 4, to: 9},
+      }
+    });
     
     /**********************************************************/
     /*                    LOAD SOUNDS                         */
@@ -78,6 +86,7 @@
     loadSound("player-hit", "sounds/player-hit.wav");
     loadSound("player-death", "sounds/player-death.wav");
     loadSound("gameover", "sounds/game-over.wav");
+    loadSound("spider-death", "sounds/spider-death.wav");
   </script>
   <script src="main.js"></script>
 </body>
