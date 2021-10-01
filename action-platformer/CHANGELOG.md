@@ -1,5 +1,7 @@
 # CHANGELOG.
 ### Thu 30 Sep:
+- Added a new way to die. If the player falls of the platform it takes you to the *Game over screen*.
+- Added a custom component `defEnemyBehaviour`. This is a component that defines the behaviour of the enemy. 
 - Added a new enemy *spider* with its respective animations (there's some errors on the animations, working on it)
 - Added a new sound *game over sound*.
 - Added a new scene, *Game over scene*. Press *enter* to play again.

@@ -1,7 +1,32 @@
-// debug.inspect = true;
+// import { defEnemyBehaviour } from "./defEnemyBehaviour";
 
+// debug.inspect = true;
 const SPEED = 100;
 const JUMP_FORCE = 550;
+
+function defEnemyBehaviour(speed = 40){
+  let dir = 1;
+  let limit = {max: 0, min: 0};
+  return {
+    id: "enemyBehaviour",
+    require: ["pos", "sprite", "area", "body"],
+    add() {
+      limit = {max: this.pos.x + 50, min: this.pos.x - 50};
+    },
+    update() {
+      if(Math.floor(this.pos.x) > limit.max){
+        dir = -1;
+        this.flipX(true);
+      }
+      if(Math.floor(this.pos.x) < limit.min){
+        dir = 1;
+        this.flipX(false);
+      }
+
+      this.move(speed * dir, 0);
+    },
+  }
+}
 
 scene("main", () => {
   const music = play("main-theme", {loop: true, volume: 0.1})
@@ -75,6 +100,7 @@ scene("main", () => {
       origin("center"),
       body(),
       layer("enemies"),
+      defEnemyBehaviour(15),
       "enemy",
       "worm",
       {
@@ -94,6 +120,7 @@ scene("main", () => {
       origin("center"),
       body(),
       layer("enemies"),
+      defEnemyBehaviour(60),
       "enemy",
       "spider",
       {
@@ -298,57 +325,62 @@ scene("main", () => {
       camPos({x: player.pos.x, y: 90})
     }
 
-    console.log(player.pos.x)
+    console.log(player.pos.x);
+
+    if(player.pos.y > 300){
+      music.stop();
+      go("gameover")
+    }
   })
 
-  const worms = get("worm");
-  for(const w of worms){
-    w.limit = {max: w.pos.x + 50, min: w.pos.x - 50};
-    w.action(() => {
-      if(!w.death){
-        if(Math.floor(w.pos.x) > w.limit.max){
-          w.reachLimit = true;
-          w.dir = -1;
-          w.flipX(true);
-        }
-        if(Math.floor(w.pos.x) < w.limit.min){
-          w.reachLimit = false;
-          w.dir = 1;
-          w.flipX(false);
-        }
+  // const worms = get("worm");
+  // for(const w of worms){
+  //   w.limit = {max: w.pos.x + 50, min: w.pos.x - 50};
+  //   w.action(() => {
+  //     if(!w.death){
+  //       if(Math.floor(w.pos.x) > w.limit.max){
+  //         w.reachLimit = true;
+  //         w.dir = -1;
+  //         w.flipX(true);
+  //       }
+  //       if(Math.floor(w.pos.x) < w.limit.min){
+  //         w.reachLimit = false;
+  //         w.dir = 1;
+  //         w.flipX(false);
+  //       }
     
-        if(w.reachLimit){
-          w.move(w.speed * w.dir, 0);
-        }else {
-          w.move(w.speed * w.dir, 0)
-        }
-      }
-    })
-  }
-  const spiders = get("spider");
-  for(const s of spiders){
-    s.limit = {max: s.pos.x + 70, min: s.pos.x - 70};
-    s.action(() => {
-      if(!s.death){
-        if(Math.floor(s.pos.x) > s.limit.max){
-          s.reachLimit = true;
-          s.dir = -1;
-          s.flipX(false);
-        }
-        if(Math.floor(s.pos.x) < s.limit.min){
-          s.reachLimit = false;
-          s.dir = 1;
-          s.flipX(true);
-        }
+  //       if(w.reachLimit){
+  //         w.move(w.speed * w.dir, 0);
+  //       }else {
+  //         w.move(w.speed * w.dir, 0)
+  //       }
+  //     }
+  //   })
+  // }
+  // const spiders = get("spider");
+  // for(const s of spiders){
+  //   s.limit = {max: s.pos.x + 70, min: s.pos.x - 70};
+  //   s.action(() => {
+  //     if(!s.death){
+  //       if(Math.floor(s.pos.x) > s.limit.max){
+  //         s.reachLimit = true;
+  //         s.dir = -1;
+  //         s.flipX(false);
+  //       }
+  //       if(Math.floor(s.pos.x) < s.limit.min){
+  //         s.reachLimit = false;
+  //         s.dir = 1;
+  //         s.flipX(true);
+  //       }
     
-        if(s.reachLimit){
-          s.move(s.speed * s.dir, 0);
-        }else {
-          s.move(s.speed * s.dir, 0)
-        }
-      }
-    })
-  }
+  //       if(s.reachLimit){
+  //         s.move(s.speed * s.dir, 0);
+  //       }else {
+  //         s.move(s.speed * s.dir, 0)
+  //       }
+  //     }
+  //   })
+  // }
 });
 
 scene("gameover", () => {

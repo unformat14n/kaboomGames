@@ -30,12 +30,12 @@
   <script src="https://unpkg.com/kaboom@next/dist/kaboom.js"></script>
   <script>
     kaboom({
-      ...{"fullscreen":true,"scale":2,"startScene":"main","version":"0.6.0"},
+      ...{"fullscreen":true,"scale":2,"startScene":"main"},
       global: true,
       background: [1, 1, 1],
       font: "sinko",
       plugins: [ peditPlugin, asepritePlugin, kbmspritePlugin ],
-    });
+    })
     loadSprite("arcane-archer", "sprites/arcane-archer.png", {
       sliceX: 8,
       sliceY: 8,
@@ -74,7 +74,7 @@
         death: {from: 4, to: 9},
       }
     });
-    
+
     /**********************************************************/
     /*                    LOAD SOUNDS                         */
     /**********************************************************/
