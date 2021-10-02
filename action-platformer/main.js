@@ -164,6 +164,7 @@ scene("main", () => {
       walking: false,
       falling: false,
       attacking: false,
+      rolling: false,
       hit: false,
       death: false,
       direction: 1,
@@ -185,6 +186,12 @@ scene("main", () => {
   keyPress("right", () => {
     player.flipX(false);
     player.direction = 1;
+  })
+  keyPress("s", () => {
+    if(player.grounded()){
+      player.rolling = true;
+    }
+    wait(1, () => {player.rolling = false})
   })
   keyRelease(["right", "left"], () => {
     player.walking = false;
@@ -269,6 +276,13 @@ scene("main", () => {
         wait(0.8, () => {destroy(player); go("gameover")})
       }
     }
+    else if (player.rolling){
+      if(anim !== "roll"){
+        player.animSpeed = 1;
+        player.play("roll");
+        wait(1, () => {player.rolling = false})
+      }
+    }
     else if (player.hit){
       if(anim !== "hurt"){
         player.animSpeed = 1;
@@ -303,7 +317,7 @@ scene("main", () => {
   };
 
   player.collides("enemy", (e) => {
-    if(!e.death){
+    if(!e.death /*|| player.rolling !== true*/){
       player.hit = true;
       play("player-hit", {volume: 0.2})
       if(player.direction > 0){
@@ -338,12 +352,20 @@ scene("main", () => {
       camPos({x: player.pos.x, y: 90})
     }
 
-    console.log(player.pos.x);
-
     if(player.pos.y > 300){
       music.stop();
       go("gameover")
     }
+
+    if(player.rolling){
+      if(player.direction == 1){
+        player.move(150, 0)
+      }else {
+        player.move(-150, 0)
+      }
+    }
+
+    console.log(player.rolling)
   })
 
   // const worms = get("worm");
@@ -397,7 +419,7 @@ scene("main", () => {
 });
 
 scene("main-menu", () => {
-  const music = play("main-theme", {volume: 0.15});
+  const music = play("main-theme", {volume: 0.2});
   add([
     text("DARKWORLD", {size: 50}),
     pos(width()/2, height()/4),
