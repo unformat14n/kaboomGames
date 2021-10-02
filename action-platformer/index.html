@@ -49,12 +49,16 @@
         death: {from: 8, to: 15},
       }
     })
-    loadSprite("platform1", "sprites/platform1.png");
-    loadSprite("platform2", "sprites/platform2.png", {
-      sliceX: 2,
-      sliceY: 1,
+    loadSprite("platform1", "sprites/column2.png", {
+      sliceX: 1,
+      sliceY: 2,
     });
-    loadSprite("platform3", "sprites/platform3.png");
+    loadSprite("platform2", "sprites/column2.png", {
+      sliceX: 1,
+      sliceY: 2,
+    });
+    loadSprite("platform3", "sprites/tile1.png");
+    loadSprite("down-platform", "sprites/tile2.png");
     loadSprite("background", "sprites/background.png");
     loadSprite("fire-worm", "sprites/worm-spritesheet.png", {
       sliceX: 9,
@@ -82,7 +86,8 @@
     loadSound("arrow-hit", "sounds/arrow-hit.wav");
     loadSound("bow-shoot", "sounds/shoot-arrow.wav");
     loadSound("worm-death", "sounds/worm-death.wav");
-    loadSound("main-theme", "sounds/main-theme.mp3");
+    loadSound("main-theme", "sounds/main-soundtrack.mp3");
+    loadSound("demo-theme", "sounds/demo-soundtrack.mp3");
     loadSound("player-hit", "sounds/player-hit.wav");
     loadSound("player-death", "sounds/player-death.wav");
     loadSound("gameover", "sounds/game-over.wav");

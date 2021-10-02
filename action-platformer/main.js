@@ -4,7 +4,7 @@
 const SPEED = 100;
 const JUMP_FORCE = 550;
 
-function defEnemyBehaviour(speed = 40){
+function defEnemyBehaviour(speed = 40, tag){
   let dir = 1;
   let limit = {max: 0, min: 0};
   return {
@@ -12,24 +12,39 @@ function defEnemyBehaviour(speed = 40){
     require: ["pos", "sprite", "area", "body"],
     add() {
       limit = {max: this.pos.x + 50, min: this.pos.x - 50};
-    },
-    update() {
-      if(Math.floor(this.pos.x) > limit.max){
-        dir = -1;
+      if(tag == "spider"){
         this.flipX(true);
       }
-      if(Math.floor(this.pos.x) < limit.min){
-        dir = 1;
-        this.flipX(false);
+    },
+    update() {
+      if(!this.death){
+        if(Math.floor(this.pos.x) > limit.max){
+          dir = -1;
+          if(tag == "spider"){
+            this.flipX(false);
+          }else {
+            this.flipX(true);
+          }
+        }
+        if(Math.floor(this.pos.x) < limit.min){
+          dir = 1;
+          if(tag == "spider"){
+            this.flipX(true);
+          }
+          else {
+            this.flipX(false);
+          }
+        }
+  
+        this.move(speed * dir, 0);
       }
-
-      this.move(speed * dir, 0);
     },
   }
 }
 
+
 scene("main", () => {
-  const music = play("main-theme", {loop: true, volume: 0.1})
+  const music = play("demo-theme", {loop: true, volume: 0.2})
 
   layers([
     "bg",
@@ -44,19 +59,19 @@ scene("main", () => {
     add([
       sprite("background"),
       layer("bg"),
-      scale(2, 3.5),
+      scale(1.5, 1.5),
       pos(205, 200),
       origin("center"),
       fixed(),
     ]),
-    add([
-      sprite("background"),
-      layer("bg"),
-      scale(2, 3.5),
-      pos(621, 200),
-      origin("center"),
-      fixed(),
-    ])
+    // add([
+    //   sprite("background"),
+    //   layer("bg"),
+    //   scale(2, 3.5),
+    //   pos(621, 200),
+    //   origin("center"),
+    //   fixed(),
+    // ])
   ];
 
   const map = addLevel([
@@ -64,20 +79,22 @@ scene("main", () => {
     "                                                                                                                                       ",
     "                                                            w      s                                                                   ",
     "                     w                                  ================       w                                   s                   ",
-    "              =================   w          w   =======-___---≈≈-≈--_≈≈===========     w       s       w     ==============  ====     ",
-    "==============----__----_-_---_========  ========--_-__-________---_____--__--___-_===========================--≈_-_≈-_-≈--_  -_≈-=====",
+    "              =================   w          w   =======-___---------_--===========     w       s       w     ==============  ====     ",
+    "==============----__----_-_---_========  ========--_-__-------------------__--___-_===========================--------------  -_--=====",
   ], {
     width: 32,
     height: 32,
     "=": () => [
-      sprite("platform1"),
+      sprite("platform1", {
+        frame: 0
+      }),
       area(),
       solid(),
       layer("enviroment"),
     ],
     "-": () => [
-      sprite("platform2", {
-        frame: 0
+      sprite("platform1", {
+        frame: 1
       }),
       layer("enviroment"),
     ],
@@ -85,10 +102,6 @@ scene("main", () => {
       sprite("platform2", {
         frame: 1
       }),
-      layer("enviroment"),
-    ],
-    "≈": () => [
-      sprite("platform3"),
       layer("enviroment"),
     ],
     "w": () => [
@@ -100,7 +113,7 @@ scene("main", () => {
       origin("center"),
       body(),
       layer("enemies"),
-      defEnemyBehaviour(15),
+      defEnemyBehaviour(35, "worm"),
       "enemy",
       "worm",
       {
@@ -114,20 +127,20 @@ scene("main", () => {
     "s": () => [
       sprite("spider", {
         anim: "walk",
-        flipX: false,
+        flipX: true,
       }),
       area({width: 25, height: 20, offset: {x: 0, y: 5}}),
       origin("center"),
       body(),
       layer("enemies"),
-      defEnemyBehaviour(60),
+      defEnemyBehaviour(60, "spider"),
       "enemy",
       "spider",
       {
         limit: {max: 0, min: 0},
         reachLimit: false,
         dir: -1,
-        speed: 60,
+        speed: 80,
         death: false,
       }
     ],
@@ -383,6 +396,32 @@ scene("main", () => {
   // }
 });
 
+scene("main-menu", () => {
+  const music = play("main-theme", {volume: 0.15});
+  add([
+    text("DARKWORLD", {size: 50}),
+    pos(width()/2, height()/4),
+    origin("center"),
+    color(108, 0, 255)
+  ]);
+  add([
+    text("Press Enter to Play", {size: 10}),
+    pos(width()/2, height()/3),
+    origin("center"),
+    color(171, 108, 255)
+  ]);
+  add([
+    text("controls: arrows to move, space to jump, a to attack", {size: 10}),
+    pos(width()/2, height()- 50),
+    origin("center"),
+    color(171, 108, 255)
+  ]);
+  keyPress("enter", () => {
+    music.stop();
+    go("main");
+  })
+})
+
 scene("gameover", () => {
   play("gameover", {volume: 0.2})
   add([
@@ -403,4 +442,4 @@ scene("end-demo", () => {
   ])
 })
 
-go("main"); 
+go("main-menu"); 
