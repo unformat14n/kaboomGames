@@ -1,7 +1,9 @@
 # CHANGELOG.
+### Sat 2 Oct:
+- Fixed issues with **rolling**.
+- Fixed issues with attack and move
 ### Fri 1 Oct:
 - Added a new feature for the player **roll**, with its respective animation `roll`.
-- Added a demo in the link: [DARKWORLD DEMO](darkworld-demo.surge.sh)
 - Added a basic main screen
 - Added new sounds, change the sound *Bipedal Mech* to another.
 - Changed the style of the platform and background

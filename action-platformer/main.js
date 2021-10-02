@@ -122,6 +122,7 @@ scene("main", () => {
         dir: -1,
         speed: 15,
         death: false,
+        deathSound: "worm-death",
       }
     ],
     "s": () => [
@@ -142,6 +143,7 @@ scene("main", () => {
         dir: -1,
         speed: 80,
         death: false,
+        deathSound: "spider-death",
       }
     ],
   })
@@ -172,12 +174,20 @@ scene("main", () => {
   ])
 
   keyDown("left", () => {
-    player.move(-SPEED, 0);
-    player.walking = true;
+    // if(!player.attacking && !player.rolling){
+    //   player.move(-SPEED, 0);
+    //   player.walking = true;
+    // }
+    if(!(player.attacking || player.rolling)){
+      player.move(-SPEED, 0);
+      player.walking = true;
+    }
   })
   keyDown("right", () => {
-    player.move(SPEED, 0);
-    player.walking = true;
+    if(!player.attacking && !player.rolling){
+      player.move(SPEED, 0);
+      player.walking = true;
+    }
   })
   keyPress("left", () => {
     player.flipX(true);
@@ -237,25 +247,15 @@ scene("main", () => {
           arrow.move(-250, 0);
         }
       })
-      arrow.collides("worm", (e) => {
+      arrow.collides("enemy", (e) => {
         play("arrow-hit", {
           volume: 0.2,
         });
         destroy(arrow);
         e.death = true;
-        play("worm-death", {volume: 0.2});
+        play(e.deathSound, {volume: 0.2});
         e.play("death")
         wait(1, () => destroy(e));
-      })
-      arrow.collides("spider", (e) => {
-        play("arrow-hit", {
-          volume: 0.2,
-        });
-        destroy(arrow);
-        e.death = true;
-        play("spider-death", {volume: 0.2});
-        e.play("death");
-        wait(0.6, () => {destroy(e);})
       })
     });
   }
@@ -317,14 +317,9 @@ scene("main", () => {
   };
 
   player.collides("enemy", (e) => {
-    if(!e.death /*|| player.rolling !== true*/){
+    if(!(e.death || player.rolling)){
       player.hit = true;
       play("player-hit", {volume: 0.2})
-      if(player.direction > 0){
-        player.moveBy(-50, 0);
-      }else {
-        player.moveBy(50, 0);
-      }
       player.hurt(1);
     }
   })
@@ -334,6 +329,13 @@ scene("main", () => {
     play("player-death", {volume: 0.2});
     music.stop()
   })
+  // player.on("hurt", () => {
+  //   if(player.direction > 0){
+  //     player.moveBy(-50, 0);
+  //   }else {
+  //     player.moveBy(50, 0);
+  //   }
+  // })
 
   player.action(() => {
     handleAnimations();
