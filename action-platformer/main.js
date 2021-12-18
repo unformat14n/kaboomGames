@@ -1,46 +1,46 @@
-// import { defEnemyBehaviour } from "./defEnemyBehaviour";
+import {defEnemyBehaviour} from './defEnemyBehaviour.js'
 
 // debug.inspect = true;
 const SPEED = 100;
 const JUMP_FORCE = 550;
 
-function defEnemyBehaviour(speed = 40, tag){
-  let dir = 1;
-  let limit = {max: 0, min: 0};
-  return {
-    id: "enemyBehaviour",
-    require: ["pos", "sprite", "area", "body"],
-    add() {
-      limit = {max: this.pos.x + 50, min: this.pos.x - 50};
-      if(tag == "spider"){
-        this.flipX(true);
-      }
-    },
-    update() {
-      if(!this.death){
-        if(Math.floor(this.pos.x) > limit.max){
-          dir = -1;
-          if(tag == "spider"){
-            this.flipX(false);
-          }else {
-            this.flipX(true);
-          }
-        }
-        if(Math.floor(this.pos.x) < limit.min){
-          dir = 1;
-          if(tag == "spider"){
-            this.flipX(true);
-          }
-          else {
-            this.flipX(false);
-          }
-        }
+// function defEnemyBehaviour(speed = 40, tag){
+//   let dir = 1;
+//   let limit = {max: 0, min: 0};
+//   return {
+//     id: "enemyBehaviour",
+//     require: ["pos", "sprite", "area", "body"],
+//     add() {
+//       limit = {max: this.pos.x + 50, min: this.pos.x - 50};
+//       if(tag == "spider"){
+//         this.flipX(true);
+//       }
+//     },
+//     update() {
+//       if(!this.death){
+//         if(Math.floor(this.pos.x) > limit.max){
+//           dir = -1;
+//           if(tag == "spider"){
+//             this.flipX(false);
+//           }else {
+//             this.flipX(true);
+//           }
+//         }
+//         if(Math.floor(this.pos.x) < limit.min){
+//           dir = 1;
+//           if(tag == "spider"){
+//             this.flipX(true);
+//           }
+//           else {
+//             this.flipX(false);
+//           }
+//         }
   
-        this.move(speed * dir, 0);
-      }
-    },
-  }
-}
+//         this.move(speed * dir, 0);
+//       }
+//     },
+//   }
+// }
 
 
 scene("main", () => {
@@ -467,3 +467,7 @@ scene("end-demo", () => {
 })
 
 go("main-menu"); 
+
+function newFunction() {
+  return "defEnemyBehaviour";
+}

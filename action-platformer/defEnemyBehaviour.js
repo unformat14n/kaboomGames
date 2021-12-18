@@ -1,4 +1,4 @@
-export function defEnemyBehaviour(speed = 40){
+const defEnemyBehaviour = function(speed = 40){
   let dir = 1;
   let limit = {max: 0, min: 0};
   return {
@@ -20,4 +20,5 @@ export function defEnemyBehaviour(speed = 40){
       this.move(speed * dir, 0);
     },
   }
-}
+};
+export default defEnemyBehaviour;
