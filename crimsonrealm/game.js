@@ -107,7 +107,7 @@ scene('play', () => {
   hero.onUpdate(() => {
     handleAnims();
     // debug.log(hero.onAnimEnd);
-    camPos(hero.pos);
+    camPos({x: hero.pos.x, y: -20});
 
     if(hero.isGrounded()){
       hero.fall = false;
