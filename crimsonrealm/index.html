@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<head>
+
+</head>
+<body>
+  <script src="https://unpkg.com/kaboom/dist/kaboom.js"></script>
+  <script>
+    kaboom({
+      width: screen.width,
+      height: screen.height,
+      background: [0,0,0],
+      crisp: true,
+    })
+
+    // DEBUGER
+    debug.inspect = true;
+
+    /* LOADER */
+    loadSprite('hero', 'assets/sprites/hero.png', {
+      sliceX: 4, 
+      sliceY: 7,
+      anims: {
+        idle: {from: 0, to: 3, loop: true, speed: 3.5},
+        walk: {from: 4, to: 9, loop: true},
+        attack: {from: 12, to: 17,},
+        jump: {from: 20, to: 21, loop: true},
+        fall: {from: 22, to: 23, loop: true},
+        crouch: 24,
+        hurt: 25,
+      }
+    });
+    loadSprite('tiles', 'assets/sprites/tileset-3.png', {
+      sliceX: 3,
+      sliceY: 1,
+    })
+  </script>
+  <script src="game.js"></script>
+</body>
