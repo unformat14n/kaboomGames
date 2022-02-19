@@ -16,9 +16,9 @@ function fakeBody(){
     }
   }
 }
-function patrol(type){
+function patrol(type, vel){
   const limit = {min: Number.NEGATIVE_INFINITY, max: Number.POSITIVE_INFINITY};
-  const speed = 60;
+  const speed = vel;
   let dir = -1;
   return {
     id: 'patrol',
@@ -45,11 +45,48 @@ function patrol(type){
   }
 }
 
+function deathFX(POS, SCALE = 1){
+  add([
+    sprite('death-fx', {anim: 'idle'}),
+    scale(SCALE),
+    pos(POS),
+    // color(50, 98, 220),
+    opacity(0.7),
+    layer('fx'),
+    origin('top'),
+    lifespan(0.4),
+  ])
+}
+
 const SPEED = 130;
 const DISPLACEMENT = 160;
+const LAYERS = ['bg', 'fg', 'game', 'player', 'fx']
 
 scene('play', () => {
+  layers(LAYERS);
   camScale(2);
+
+  add([
+    sprite('bg'),
+    scale(4),
+    pos(width()/2, height()/2),
+    fixed(),
+    origin('center')
+  ])
+  add([
+    sprite('fg'),
+    scale(7.2, 4),
+    pos(width()/2, height() - 200),
+    fixed(),
+    origin('center')
+  ])
+  add([
+    sprite('fg2'),
+    scale(4, 4),
+    pos(width()/2, height() - 120),
+    fixed(),
+    origin('center')
+  ])
 
   const map = addLevel([
     "            ",
@@ -66,12 +103,14 @@ scene('play', () => {
       sprite('tiles', {frame: 0}),
       area(),
       solid(),
+      layer('fg'),
     ],
     "|": () => [
       rect(32, 41),
       color(0, 0, 32),
       area(),
       solid(),
+      layer('fg'),
     ],
     "s": () => [
       sprite('skeleton', {anim: 'walk'}),
@@ -79,8 +118,33 @@ scene('play', () => {
       fakeBody(),
       area({scale: 0.6, offset: vec2(10, 10)}),
       solid(),
-      patrol('skeleton'),
+      layer('game'),
+      patrol('skeleton', 50),
       "enemy"
+    ],
+  })
+
+  const decoration = addLevel([
+    "                  ",
+    "                  ",
+    "                  ",
+    "  1       2   1   ",
+    "                  ",
+    "                  ",
+  ], {
+    width: 32,
+    height: 41,
+    "1": () => [
+      sprite('bush1'),
+      origin('center'),
+      layer('bg'),
+      // scale(2),
+    ],
+    "2": () => [
+      sprite('bush2'),
+      origin(vec2(0, 0.5)),
+      layer('bg'),
+      // scale(2),
     ],
   })
 
@@ -91,6 +155,7 @@ scene('play', () => {
     scale(1),
     area({width: 20, height: 30, offset: vec2(5, -10)}),
     body(),
+    layer('player'),
     {
       walking: false,
       attacking: false,
@@ -102,7 +167,7 @@ scene('play', () => {
     }
   ])
   const swordCollider = add([
-    rect(30, 10),
+    rect(20, 10),
     area(),
     pos(),
     opacity(0),
@@ -143,8 +208,10 @@ scene('play', () => {
   })
 
   onKeyPress('a', () => {
-    hero.attacking = true;
-    swordCollider.attacking = true;
+    if(!(hero.hurt && hero.fall && hero.jumping)){
+      hero.attacking = true;
+      swordCollider.attacking = true;
+    }
   })
 
   hero.onAnimEnd('attack', () => {
@@ -164,7 +231,8 @@ scene('play', () => {
     e.onUpdate(() => {
       if(e.isTouching(get('sword')[0])){
         if(get('sword')[0].attacking){
-          wait(0.4, () => e.destroy());
+          wait(0.2, () => destroy(e));
+          wait(0.2, () => deathFX(e.pos, 1));
         }
         // debug.log('touching')
       }

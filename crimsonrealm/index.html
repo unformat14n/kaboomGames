@@ -36,6 +36,19 @@
         walk: {from: 0, to: 7, loop: true},
       }
     });
+    loadSprite('death-fx', 'assets/sprites/death-fx.png', {
+      sliceX: 5, 
+      sliceY: 1,
+      anims: {
+        idle: {from: 0, to: 4, speed: 14},
+      }
+    });
+    loadSprite('bg', 'assets/sprites/background.png');
+    loadSprite('fg', 'assets/sprites/mountains.png');
+    loadSprite('fg2', 'assets/sprites/graveyard.png');
+    loadSprite('bush1', 'assets/sprites/bush-small.png');
+    loadSprite('bush2', 'assets/sprites/bush-large.png');
+    
     loadSprite('tiles', 'assets/sprites/tileset-3.png', {
       sliceX: 3,
       sliceY: 1,
