@@ -43,11 +43,31 @@
         idle: {from: 0, to: 4, speed: 14},
       }
     });
+    loadSprite('ghost', 'assets/sprites/ghost.png', {
+      sliceX: 4, 
+      sliceY: 1,
+      anims: {
+        idle: {from: 0, to: 3, loop: true},
+      }
+    });
+    loadSprite('g-bullet', 'assets/sprites/Firebolt SpriteSheet.png', {
+      sliceX: 11, 
+      sliceY: 1,
+      anims: {
+        idle: {from: 0, to: 3, loop: true},
+        destroy: {from: 5, to: 10},
+      }
+    });
+
     loadSprite('bg', 'assets/sprites/background.png');
     loadSprite('fg', 'assets/sprites/mountains.png');
     loadSprite('fg2', 'assets/sprites/graveyard.png');
     loadSprite('bush1', 'assets/sprites/bush-small.png');
     loadSprite('bush2', 'assets/sprites/bush-large.png');
+    loadSprite('statue', 'assets/sprites/statue.png');
+    loadSprite('stone1', 'assets/sprites/stone-1.png');
+    loadSprite('signs', 'assets/sprites/stone-3.png');
+    loadSprite('tree1', 'assets/sprites/tree-1.png');
     
     loadSprite('tiles', 'assets/sprites/tileset-3.png', {
       sliceX: 3,
