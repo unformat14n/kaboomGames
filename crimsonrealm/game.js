@@ -17,6 +17,28 @@ function fakeBody(){
   }
 }
 
+function float(){
+  const limit = {max: 0, min: 0};
+  let dir = -1;
+  return {
+    id: 'float',
+    require: ['pos'],
+    add(){
+      limit.min = this.pos.y - 1;
+      limit.max = this.pos.y + 1;
+    },
+    update(){
+      if(this.pos.y > limit.max){
+        dir = -1;
+      }
+      if(this.pos.y < limit.min){
+        dir = 1;
+      }
+      this.move(0, dir*2);
+    }
+  }
+}
+
 function patrol(type, vel){
   const limit = {min: Number.NEGATIVE_INFINITY, max: Number.POSITIVE_INFINITY};
   const speed = vel;
@@ -112,6 +134,7 @@ const SPEED = 150;
 const JUMP_FORCE = 400;
 const DISPLACEMENT = 200;
 const LAYERS = ['bg', 'fg', 'game', 'player', 'fx'];
+const msgs = ['Press SPACE to jump', "Some enemies are capable of shoot. You can duck (press DOWN ARROW) or jump to evade their attacks.", "Beware the enemies. Attack with A. And you oughtn't get too close."]
 
 scene('play', () => {
   layers(LAYERS);
@@ -202,9 +225,9 @@ scene('play', () => {
   })
 
   const decoration = addLevel([
-    "                                                 ",
-    "                                                 ",
-    "                              !      t        2  ",
+    "                              m            m      ",
+    "                m                                ",
+    "                              !      t     !  2   ",
     "  1       2   1 !      s  1                      ",
     "                                                 ",
     "                                                 ",
@@ -252,11 +275,27 @@ scene('play', () => {
       }
       // scale(2),
     ],
+    "m": () => [
+      text('', {size: 10, width: 200, font: 'sinko'}),
+      origin('center'),
+      layer('bg'),
+      float(),
+      "message",
+    ]
   })
+  // readd("message", () => {});
+
+  const ms = get('message');
+  let j = 0;
+  for(let i=ms.length - 1; i>=0; i--){
+    let m = ms[i];
+    m.text = msgs[j];
+    j++;
+  }
 
   const hero = add([
     sprite('hero'),
-    pos(1500, 50),
+    pos(50, 50),
     origin('bot'),
     scale(1),
     area({width: 10, height: 30, offset: vec2(5, -10)}),
