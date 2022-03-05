@@ -51,9 +51,13 @@ function patrol(type, vel){
         limit.min = this.pos.x - 100;
         limit.max = this.pos.x + 100
       } 
+      if(type == 'skull'){
+        limit.min = this.pos.x - 140;
+        limit.max = this.pos.x + 140;
+      } 
     },
     update(){
-      if(type == 'skeleton'){
+      // if(type == 'skeleton'){
         if(this.pos.x < limit.min){
           dir = 1;
           this.flipX(true);
@@ -63,7 +67,7 @@ function patrol(type, vel){
           this.flipX(false);
         }
         this.move(speed*dir, 0);
-      }
+      // }
     }
   }
 }
@@ -80,7 +84,7 @@ function shooter(type){
     },
     update(){
       t += dt();
-      if(t >= 3){
+      if(t >= this.s){
         t = 0;
         spawnBullet('g-bullet', vec2(this.pos.x, this.pos.y - 10))
       }
@@ -120,7 +124,6 @@ function spawnBullet(type, p){
     }
   })
   b.onCollide('hero', () => {
-    b.destroyed = true;
     if(b.curAnim() !== 'destroy'){
       b.play('destroy');
     }
@@ -132,9 +135,125 @@ function spawnBullet(type, p){
 
 const SPEED = 150;
 const JUMP_FORCE = 400;
-const DISPLACEMENT = 200;
+const DISPLACEMENT = -200;
 const LAYERS = ['bg', 'fg', 'game', 'player', 'fx'];
-const msgs = ['Press SPACE to jump', "Some enemies are capable of shoot. You can duck (press DOWN ARROW) or jump to evade their attacks.", "Beware the enemies. Attack with A. And you oughtn't get too close."]
+const msgs = ['Press SPACE to jump', "Some enemies are capable of shoot. You can duck (press DOWN ARROW) or jump to evade their attacks.", "Beware the enemies. Attack with A. And you oughtn't get too close.", "The fire skulls are powerful demons. Don't try to attack them. Better to dodge. You can not hit them"];
+const decorOptions = {
+  width: 32,
+  height: 41,
+  "1": () => [
+    sprite('bush1'),
+    origin('center'),
+    layer('bg'),
+    // scale(2),
+  ],
+  "2": () => [
+    sprite('bush2'),
+    origin(vec2(0, 0.5)),
+    layer('bg'),
+    // scale(2),
+  ],
+  "3": () => [
+    sprite('stone1'),
+    origin(vec2(0, 0.5)),
+    layer('bg'),
+    // scale(2),
+  ],
+  "s": () => [
+    sprite('statue'),
+    origin(vec2(-1, 0.5)),
+    layer('bg'),
+    // scale(2),
+  ],
+  "t": () => [
+    sprite('tree1'),
+    origin(vec2(0, 0.9)),
+    layer('bg'),
+    // scale(2),
+  ],
+  "!": () => [
+    sprite('signs'),
+    origin(vec2(0, 0.6)),
+    layer('bg'),
+    area(),
+    'sign',
+    {
+      msg: '',
+    }
+    // scale(2),
+  ],
+  "m": () => [
+    text('', {size: 10, width: 200, font: 'sinko'}),
+    origin('center'),
+    layer('bg'),
+    float(),
+    "message",
+  ]
+}
+const mapOpts = {
+  width: 32,
+  height: 41,
+  // pos: vec2(, 100),
+  "=": () => [
+    sprite('tiles', {frame: 0}),
+    area(),
+    solid(),
+    layer('fg'),
+  ],
+  "|": () => [
+    rect(32, 41),
+    color(0, 0, 32),
+    area(),
+    solid(),
+    layer('fg'),
+  ],
+  "!": () => [
+    rect(10, height()),
+    // color(0, 0, 32),
+    opacity(0),
+    area(),
+    solid(),
+    layer('fg'),
+  ],
+  "s": () => [
+    sprite('skeleton', {anim: 'walk'}),
+    body(),
+    fakeBody(),
+    area({scale: 0.6, offset: vec2(10, 10)}),
+    solid(),
+    layer('game'),
+    patrol('skeleton', 50),
+    "enemy",
+    "skeleton",
+    {
+      death: false,
+    }
+  ],
+  "S": () => [
+    sprite('skull', {anim: 'idle'}),
+    area({scale: 0.4, offset: vec2(0, 6)}),
+    solid(),
+    origin('center'),
+    layer('game'),
+    patrol('skull', 100),
+    "skull",
+  ],
+  "g": () => [
+    sprite('ghost', {anim: 'idle', flipX: true}),
+    body(),
+    shooter('wizard'),
+    fakeBody(),
+    area({scale: 0.6, offset: vec2(10, 10)}),
+    solid(),
+    layer('game'),
+    // patrol('skeleton', 50),
+    "enemy",
+    {
+      death: false,
+      s: 1.5,
+    }
+  ],
+}
 
 scene('play', () => {
   layers(LAYERS);
@@ -163,126 +282,22 @@ scene('play', () => {
     origin('center')
   ])
 
-  const map = addLevel([
-    "!                                                                        ",
-    "                                  s                         g            ",
-    "                            ============  =====================          ",
-    "===================  =======||||||||||||  |||||||||||||||||||||=======  =",
-    "|||||||||||||||||||  |||||||||||||||||||  ||||||||||||||||||||||||||||  |",
-    "            ",
-  ], {
-    width: 32,
-    height: 41,
-    // pos: vec2(, 100),
-    "=": () => [
-      sprite('tiles', {frame: 0}),
-      area(),
-      solid(),
-      layer('fg'),
-    ],
-    "|": () => [
-      rect(32, 41),
-      color(0, 0, 32),
-      area(),
-      solid(),
-      layer('fg'),
-    ],
-    "!": () => [
-      rect(10, height()),
-      // color(0, 0, 32),
-      opacity(0),
-      area(),
-      solid(),
-      layer('fg'),
-    ],
-    "s": () => [
-      sprite('skeleton', {anim: 'walk'}),
-      body(),
-      fakeBody(),
-      area({scale: 0.6, offset: vec2(10, 10)}),
-      solid(),
-      layer('game'),
-      patrol('skeleton', 50),
-      "enemy",
-      {
-        death: false,
-      }
-    ],
-    "g": () => [
-      sprite('ghost', {anim: 'idle', flipX: true}),
-      body(),
-      shooter('wizard'),
-      fakeBody(),
-      area({scale: 0.6, offset: vec2(10, 10)}),
-      solid(),
-      layer('game'),
-      // patrol('skeleton', 50),
-      "enemy",
-      {
-        death: false,
-      }
-    ],
-  })
-
   const decoration = addLevel([
-    "                              m            m      ",
-    "                m                                ",
-    "                              !      t     !  2   ",
-    "  1       2   1 !      s  1                      ",
-    "                                                 ",
-    "                                                 ",
-  ], {
-    width: 32,
-    height: 41,
-    "1": () => [
-      sprite('bush1'),
-      origin('center'),
-      layer('bg'),
-      // scale(2),
-    ],
-    "2": () => [
-      sprite('bush2'),
-      origin(vec2(0, 0.5)),
-      layer('bg'),
-      // scale(2),
-    ],
-    "3": () => [
-      sprite('stone1'),
-      origin(vec2(0, 0.5)),
-      layer('bg'),
-      // scale(2),
-    ],
-    "s": () => [
-      sprite('statue'),
-      origin(vec2(-1, 0.5)),
-      layer('bg'),
-      // scale(2),
-    ],
-    "t": () => [
-      sprite('tree1'),
-      origin(vec2(0, 0.9)),
-      layer('bg'),
-      // scale(2),
-    ],
-    "!": () => [
-      sprite('signs'),
-      origin(vec2(0, 0.6)),
-      layer('bg'),
-      area(),
-      'sign',
-      {
-        msg: '',
-      }
-      // scale(2),
-    ],
-    "m": () => [
-      text('', {size: 10, width: 200, font: 'sinko'}),
-      origin('center'),
-      layer('bg'),
-      float(),
-      "message",
-    ]
-  })
+    "                              m            m                                                               m                               ",
+    "                m                                                                                t                                         ",
+    "                              !      t     !  2          1                             2                   !        2 2     1       1      ",
+    "  1       2   1 !      s  1                                       1       s      1                                                         ",
+    "                                                                                                                                           ",
+    "                                                                                                                                           ",
+  ], decorOptions)
+  const map = addLevel([
+    "!                                                                                                 s     g                                  ",
+    "                                  s                         g                            g ================      S              S          ",
+    "                            ============  =====================               s      ======||||||||||||||||==============  ===========     ",
+    "===================  =======||||||||||||  |||||||||||||||||||||=======  =============||||||||||||||||||||||||||||||||||||  |||||||||||     ",
+    "|||||||||||||||||||  |||||||||||||||||||  ||||||||||||||||||||||||||||  |||||||||||||||||||||||||||||||||||||||||||||||||  |||||||||||     ",
+    "            ",
+  ], mapOpts)
   // readd("message", () => {});
 
   const ms = get('message');
@@ -295,9 +310,10 @@ scene('play', () => {
 
   const hero = add([
     sprite('hero'),
-    pos(50, 50),
+    pos(2000, 50),
     origin('bot'),
     scale(1),
+    health(10),
     area({width: 10, height: 30, offset: vec2(5, -10)}),
     body(),
     layer('player'),
@@ -309,13 +325,13 @@ scene('play', () => {
       fall: false,
       jumping: false,
       crouching: false,
-      hurt: false,
+      hit: false,
       dir: 1,
-      knockback: 1,
+      knockback: 1
     }
   ])
   const swordCollider = add([
-    rect(20, 10),
+    rect(25, 10),
     area(),
     pos(hero.pos),
     opacity(0),
@@ -341,14 +357,14 @@ scene('play', () => {
   onKeyDown('left', () => {
     hero.flipX(true);
     hero.dir = -1;
-    if(!hero.attacking && !hero.hurt && !hero.crouching){
+    if(!hero.hit && !hero.attacking && !hero.crouching){
       hero.move(-SPEED, 0)
     }
   })
   onKeyDown('right', () => {
     hero.flipX(false);
     hero.dir = 1;
-    if(!hero.attacking && !hero.hurt && !hero.crouching){
+    if(!hero.attacking && !hero.hit && !hero.crouching){
       hero.move(SPEED, 0)
     }
   })
@@ -365,7 +381,7 @@ scene('play', () => {
   })
 
   onKeyPress('a', () => {
-    if(!(hero.hurt && hero.fall && hero.jumping)){
+    if(!(hero.hit && hero.fall && hero.jumping)){
       hero.attacking = true;
       swordCollider.attacking = true;
     }
@@ -377,10 +393,39 @@ scene('play', () => {
   })
 
   hero.onCollide("enemy", (e) => {
-    hero.hurt = true;
+    if(e.is('skeleton') || e.is('skull')){
+      if(e.dir == -1){
+        hero.knockback = -1;
+      }else {
+        hero.knockback = 1;
+      }
+    }else{
+      if(hero.pos.x > e.pos.x){
+        hero.knockback = 1;
+      }else {
+        hero.knockback = -1
+      }
+    }
+    hero.hurt(1);
   })
   hero.onCollide("dangerous", (e) => {
-    hero.hurt = true;
+    if(!e.destroyed){
+      hero.hit = true;
+      e.destroyed = true;
+      hero.hurt(1);
+    }
+  })
+  hero.onCollide("skull", (e) => {
+    if(e.dir == -1){
+      hero.knockback = -1;
+    }else {
+      hero.knockback = 1;
+    }
+    hero.hit = true;
+    hero.hurt(1);
+  })
+  hero.on('hurt', () => {
+    hero.hit = true;
   })
 
   onKeyPress('space', () => {
@@ -396,20 +441,15 @@ scene('play', () => {
           wait(0.2, () => deathFX(e.pos, 1));
         }
       }
-      if(e.pos.x < hero.pos.x){
-        hero.knockback = 1;
-      }else {
-        hero.knockback = -1;
-      }
     })
   })
 
   const handleAnims = () => {
     const curAnim = hero.curAnim();
-    if(hero.hurt){
+    if(hero.hit){
       if(curAnim !== 'hurt'){
         hero.play('hurt');
-        wait(0.3, () => hero.hurt = false)
+        wait(0.3, () => hero.hit = false)
       }
     }
     else if(hero.fall){
@@ -451,8 +491,8 @@ scene('play', () => {
       hero.fall = true;
     }
 
-    if(hero.hurt){
-      hero.move(-hero.dir*DISPLACEMENT, 0);
+    if(hero.hit){
+      hero.move(hero.knockback*DISPLACEMENT, 0);
     }
 
     if(hero.crouching){
@@ -461,7 +501,7 @@ scene('play', () => {
       hero.area.height = 30;
     }
 
-    // debug.log(camPos())
+    debug.log(hero.knockback)
   })
 })
 
