@@ -257,7 +257,7 @@ const mapOpts = {
 
 scene('play', () => {
   layers(LAYERS);
-  gravity(950)
+  gravity(950);
   camScale(2);
 
   add([
