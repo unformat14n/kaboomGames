@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<head>
+  <script src="https://unpkg.com/kaboom/dist/kaboom.js"></script>
+</head>
+<body>
+  <script>
+    kaboom({
+      width: window.innerWidth,
+      height: window.innerHeight,
+      crisp: true,
+      background: [0,0,0],
+    })
+    loadSprite('bulbasaur', 'assets/sprites/bulbasaur-back1.png');
+    loadSprite('bulbasaur-e', 'assets/sprites/bulbasaur-front1.png');
+    loadSprite('grass-base', 'assets/sprites/grass-base.png');
+    loadSprite('e-grass-base', 'assets/sprites/e-grass-base.png');
+    </script>
+  <script src="game.js" ></script>
+</body>
