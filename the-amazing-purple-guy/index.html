@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<head>
+  <title>The Amazing Purple Guy</title>
+  <script src="https://unpkg.com/kaboom/dist/kaboom.js"></script>
+</head>
+<body>
+  <script>
+    kaboom({
+      width: window.innerWidth,
+      height: window.innerHeight,
+      background: [0,0,0],
+      crisp: true,
+    })
+    loadSprite('player', 'assets/sprites/player.png', {
+      sliceX: 4,
+      sliceY: 3,
+      anims: 
+      {
+        idle: {from: 0, to: 3, loop: true}
+      }
+    })
+  </script>
+</body>
