@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <head>
-  <title>The Amazing Purple Guy</title>
+  <!-- <title>The Amazing Purple Guy</title> -->
   <script src="https://unpkg.com/kaboom/dist/kaboom.js"></script>
 </head>
 <body>
@@ -16,8 +16,24 @@
       sliceY: 3,
       anims: 
       {
-        idle: {from: 0, to: 3, loop: true}
+        idle: {from: 0, to: 3, loop: true, speed: 8},
+        run: {from: 4, to: 7, loop: true,},
+        fall: 8,
+        crouch: 9,
       }
     })
+    loadSprite('slime', 'assets/sprites/slime.png', {
+      sliceX: 4,
+      sliceY: 1,
+      anims: 
+      {
+        idle: {from: 0, to: 1, loop: true, speed: 3},
+      }
+    })
+    loadSprite('tiles', 'assets/sprites/tiles.png', {
+      sliceX: 4,
+      sliceY: 1,
+    })
   </script>
+  <script src="game.js"></script>
 </body>
