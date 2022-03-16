@@ -1,5 +1,55 @@
 debug.inspect = true;
 
+/*===============================================
+=                   Functions                   =
+=================================================*/
+function patrol(speed, dist){
+  let limit = {};
+  let dir = -1;
+  return {
+    id: 'patrol',
+    require: ['area', 'pos', 'sprite'],
+    add(){
+      limit.min = this.pos.x - dist;
+      limit.max = this.pos.x + dist;
+    },
+    update(){
+      // if(type == 'skeleton'){
+        if(this.pos.x < limit.min){
+          dir = 1;
+          this.flipX(false);
+        }
+        if(this.pos.x > limit.max){
+          dir = -1;
+          this.flipX(true);
+        }
+        this.move(speed*dir, 0);
+      // }
+    }
+  }
+}
+
+function fakeBody(){
+  return {
+    id: 'fakeBody',
+    require: ['area', 'pos', 'body'],
+    add(){
+      //nothing :)
+    },
+    update(){
+      if(this.c('body')){
+        if(this.isGrounded()){
+          this.unuse('body');
+        }
+      }else {
+        this.unuse('fakebody');
+      }
+    }
+  }
+}
+
+/*============  End of Functions  =============*/
+
 scene('play', () => {
 
   const map = addLevel([
@@ -22,7 +72,11 @@ scene('play', () => {
       area({width: 8, height: 4}),
       origin('bot'),
       solid(),
+      body(),
       scale(5),
+      patrol(80, 50),
+      fakeBody(),
+      'enemy',
     ],
   })
 
@@ -33,6 +87,7 @@ scene('play', () => {
     origin('bot'),
     body(),
     area({width: 5, height: 8}),
+    'player',
     {
       fall: false,
       run: false,
@@ -65,9 +120,20 @@ scene('play', () => {
     player.crouch = false;
     player.area.height = 8;
   })
-  onKeyPress('space', () => {
+  onKeyPress('a', () => {
     player.jump(500);
   })
+
+  player.onGround((l) => {
+		if (l.is("enemy")) {
+			player.jump(200);
+      l.scale.y = 1.5;
+      l.unuse('patrol');
+			wait(0.2, () => destroy(l));
+			// addKaboom(player.pos)
+			// play("powerup")
+		}
+	})
 
   const handleAnim = () => {
     const anim = player.curAnim();
