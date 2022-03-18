@@ -13,21 +13,65 @@
     })
     loadSprite('player', 'assets/sprites/player.png', {
       sliceX: 4,
-      sliceY: 3,
-      anims: 
+      sliceY: 3.99,
+      anims:
       {
         idle: {from: 0, to: 3, loop: true, speed: 8},
         run: {from: 4, to: 7, loop: true,},
         fall: 8,
         crouch: 9,
+        hurt: {from: 10, to: 11, speed: 6}
       }
     })
     loadSprite('slime', 'assets/sprites/slime.png', {
       sliceX: 4,
       sliceY: 1,
-      anims: 
+      anims:
       {
         idle: {from: 0, to: 1, loop: true, speed: 3},
+      }
+    })
+    loadSprite('coin', 'assets/sprites/coin.png', {
+      sliceX: 4,
+      sliceY: 1,
+      anims:
+      {
+        idle: 0,
+        shine: {from: 1, to: 3, speed: 8}
+      }
+    })
+    loadSprite('coin-box', 'assets/sprites/coin-box.png', {
+      sliceX: 4,
+      sliceY: 2,
+      anims:
+      {
+        on: 0,
+        shine: {from: 1, to: 5, speed: 10},
+        off: 6,
+      }
+    })
+    loadSprite('zombie', 'assets/sprites/zombie.png', {
+      sliceX: 4,
+      sliceY: 1,
+      anims:
+      {
+        idle: {from: 0, to: 3, loop: true, speed: 6},
+      }
+    })
+    loadSprite('ghost', 'assets/sprites/ghost.png', {
+      sliceX: 4,
+      sliceY: 1,
+      anims:
+      {
+        idle: {from: 0, to: 1, loop: true, speed: 8},
+      }
+    })
+    loadSprite('bat', 'assets/sprites/bat.png', {
+      sliceX: 4,
+      sliceY: 1,
+      anims:
+      {
+        idle: {from: 0, to: 1, loop: true, speed: 8},
       }
     })
     loadSprite('tiles', 'assets/sprites/tiles.png', {
