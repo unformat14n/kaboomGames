@@ -105,10 +105,11 @@ function createCoin(p){
   ])
 }
 function stalk(obj, speed){
+  let offset = 500;
   // let dir = -1;
   return {
     id: 'stalk',
-    require: ['pos', 'sprite', 'outview'],
+    require: ['pos', 'sprite', ],
     add(){
       // nothing to do here :)
     },
@@ -117,8 +118,15 @@ function stalk(obj, speed){
       //   this.pause = true;
       //   debug.log('outside')
       // })
-      if(!this.destroyed){
-        this.moveTo(obj.pos, speed);
+      if(this.pos.x - offset < obj.pos.x){
+        if(!this.destroyed){
+          this.moveTo(vec2(obj.pos.x, obj.pos.y - 5), speed);
+        }
+        if(obj.pos.x > this.pos.x){
+          this.flipX(false);
+        }else {
+          this.flipX(true)
+        }
       }
     }
   }
@@ -126,12 +134,22 @@ function stalk(obj, speed){
 
 /*============  End of Functions  =============*/
 
+/*================================================
+=                   Constants                   =
+=================================================*/
+
+const SPEED = 185;
+const JUMP_FORCE = 550;
+const DISPLACEMENT = 180;
+
+/* ============  End of Constants  =============*/
+
 scene('play', () => {
 
   const player = add([
     sprite('player', {anim: 'idle'}),
     scale(5),
-    pos(3000, 60),
+    pos(100, 140),
     origin('bot'),
     body(),
     health(5),
@@ -147,16 +165,16 @@ scene('play', () => {
   ])
 
   const map = addLevel([
-    '                                                                                             ',
-    '                                                                                             ',
-    '                                                                                             ',
-    '                                                                                             ',
-    '                            $    $$$                                                         ',
-    '                                  s                                                          ',
-    '              $             =  =======  ===                            $       $            b',
-    '                            =             =     s                          g                 ',
-    '       s     ====       z   =             ============                ===========  ==========',
-    ' ==========        ==========             ============  =  =   =   =  ===========            ',
+    '                                                                                                                                                     ',
+    '                                                                                                                                                     ',
+    '                                                                                                                                                     ',
+    '                                                                                                                                                    ☖',
+    '                            $    $$$                                                                                                                =',
+    '                                  s                                                                                                               =  ',
+    '              $             =  =======  ===                            $       $      $$$$  b                    =   $                 b       =     ',
+    '                            =             =     s                          g                           ==  =  =            g         s      =        ',
+    '       s     ====       z   =             ============                ===========  ==========     ⇿                        ⇿     =========           ',
+    ' ==========        ==========             ============  =  =   =   =  ===========                                    =                               ',
   ], {
     width: 40,
     height: 40,
@@ -198,10 +216,9 @@ scene('play', () => {
     ],
     "b": () => [
       sprite('bat', {anim: 'idle'}),
-      area({width: 8, height: 8}),
+      area({width: 6, height: 4}),
       origin('center'),
       solid(),
-      outview({pause: true}),
       // body(),
       scale(5),
       stalk(player, 70),
@@ -240,6 +257,26 @@ scene('play', () => {
         used: false,
       }
     ],
+    "⇿": () => [
+      sprite('mov-tile', {anim: 'idle'}),
+      area({width: 16, height: 8}),
+      origin('bot'),
+      solid(),
+      scale(5),
+      patrol(80, 150),
+      // shinny(),
+      "moving",
+    ],
+    "☖": () => [
+      sprite('portal', {anim: 'idle'}),
+      area({width: 8, height: 8}),
+      origin(vec2(-0.5, 0.5)),
+      // solid(),
+      scale(5),
+      // patrol(80, 150),
+      // shinny(),
+      "door",
+    ],
   })
   let score = 0;
   const scoreLabel = add([
@@ -251,17 +288,11 @@ scene('play', () => {
   scoreLabel.onUpdate(() => {
     scoreLabel.text = score;
   })
-  every('bat', (b) => {
-    b.onEnterView(() => {
-      debug.log('hello');
-      b.pause = true;
-    })
-  })
 
   onKeyDown('left', () => {
     if(!player.crouch && !player.hit){
       player.run = true;
-      player.move(-200, 0);
+      player.move(-SPEED, 0);
     }
     player.flipX(true);
     player.dir = -1;
@@ -269,7 +300,7 @@ scene('play', () => {
   onKeyDown('right', () => {
     if(!player.crouch && !player.hit){
       player.run = true;
-      player.move(200, 0);
+      player.move(SPEED, 0);
     }
     player.flipX(false);
     player.dir = 1;
@@ -290,7 +321,7 @@ scene('play', () => {
   onKeyPress('a', () => {
     if(!player.hit){
       if(player.grounded()){
-        player.jump(500);
+        player.jump(JUMP_FORCE);
       }
     }
   })
@@ -376,7 +407,7 @@ scene('play', () => {
     // debug.log(player.walk)
 
     if(player.hit){
-      player.move(player.kbk*150, 0);
+      player.move(player.kbk*DISPLACEMENT, 0);
     }
   })
 })

@@ -78,6 +78,22 @@
       sliceX: 4,
       sliceY: 1,
     })
+    loadSprite('mov-tile', 'assets/sprites/mov-tile.png', {
+      sliceX: 2,
+      sliceY: 1,
+      anims:
+      {
+        idle: {from: 0, to: 1, loop: true, speed: 6}
+      }
+    })
+    loadSprite('portal', 'assets/sprites/portal.png', {
+      sliceX: 4,
+      sliceY: 1,
+      anims:
+      {
+        idle: {from: 0, to: 3, loop: true, speed: 6}
+      }
+    })
   </script>
   <script src="game.js"></script>
 </body>
