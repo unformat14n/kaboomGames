@@ -92,17 +92,31 @@ function shinny(){
     }
   }
 }
-function createCoin(p){
-  add([
-    sprite('coin', {anim: 'shine'}),
-    pos(p),
-    origin('center'),
-    lifespan(0.5, {fade: 0.2}),
-    move(UP, 30),
-    scale(3),
-    // shinny(),
-    'coin',
-  ])
+function createFX(p, type, value){
+  switch(type){
+    case 'coin':
+      add([
+        sprite('coin', {anim: 'shine'}),
+        pos(p),
+        origin('center'),
+        lifespan(0.5, {fade: 0.2}),
+        move(UP, 30),
+        scale(3),
+        // shinny(),
+        'coin',
+      ])
+      break;
+    case 'score':
+      add([
+        text(`${value}`, {size: 20, }),
+        pos(p),
+        origin('center'),
+        lifespan(0.5, {fade: 0.2}),
+        move(UP, 30),
+        layer('ui'),
+      ])
+      break;
+  }
 }
 function stalk(obj, speed){
   let offset = 500;
@@ -141,10 +155,24 @@ function stalk(obj, speed){
 const SPEED = 185;
 const JUMP_FORCE = 550;
 const DISPLACEMENT = 180;
+const LAYERS = ['bg', 'environment', 'objects', 'fx', 'ui'];
+const LEVELS = ['THE CASTLE', 'DUNGEONS OF DOOM',]
 
 /* ============  End of Constants  =============*/
 
-scene('play', () => {
+scene('play', (lvl, s, c) => {
+
+  add([
+    text(LEVELS[lvl-1], {size: 80,}),
+    pos(width()/2, height()/4),
+    fixed(),
+    origin('center'),
+    layer('ui'),
+    lifespan(2, {fade: 1})
+  ])
+  layers(LAYERS)
+
+  const music = play('level1', {loop: true, volume: 0.25})
 
   const player = add([
     sprite('player', {anim: 'idle'}),
@@ -153,6 +181,7 @@ scene('play', () => {
     origin('bot'),
     body(),
     health(5),
+    layer('objects'),
     area({width: 5, height: 8}),
     'player',
     {
@@ -161,6 +190,7 @@ scene('play', () => {
       crouch: false,
       dir: 1,
       kbk: 1,
+      teleport: false,
     }
   ])
 
@@ -182,6 +212,7 @@ scene('play', () => {
       sprite('tiles', {frame: 0}),
       area(),
       solid(),
+      layer('environment'),
       scale(5)
     ],
     "s": () => [
@@ -191,6 +222,7 @@ scene('play', () => {
       solid(),
       body(),
       scale(5),
+      layer('objects'),
       patrol(80, 50),
       fakeBody(),
       'enemy',
@@ -204,6 +236,7 @@ scene('play', () => {
       area({width: 8, height: 8}),
       origin('center'),
       solid(),
+      layer('objects'),
       // body(),
       scale(5),
       patrol(140, 150),
@@ -220,6 +253,7 @@ scene('play', () => {
       origin('center'),
       solid(),
       // body(),
+      layer('objects'),
       scale(5),
       stalk(player, 70),
       // fakeBody(),
@@ -240,6 +274,7 @@ scene('play', () => {
       patrol(50, 100),
       fakeBody(),
       'dangerous',
+      layer('objects'),
       'invincible',
       {
         destroyed: false,
@@ -252,6 +287,7 @@ scene('play', () => {
       solid(),
       scale(4),
       shinny(),
+      layer('environment'),
       "box",
       {
         used: false,
@@ -264,6 +300,7 @@ scene('play', () => {
       solid(),
       scale(5),
       patrol(80, 150),
+      layer('environment'),
       // shinny(),
       "moving",
     ],
@@ -272,16 +309,35 @@ scene('play', () => {
       area({width: 8, height: 8}),
       origin(vec2(-0.5, 0.5)),
       // solid(),
+      layer('environment'),
       scale(5),
       // patrol(80, 150),
       // shinny(),
       "door",
     ],
   })
-  let score = 0;
-  const scoreLabel = add([
-    text(`${score}`, {size: 45, font: 'sink'}),
+  
+  let score = s;
+  let coins = c;
+  const coinsImg = add([
+    sprite('coin'),
     pos(20, 20),
+    fixed(),
+    layer('ui'),
+    scale(5),
+  ])
+  const coinsLabel = add([
+    text(`${coins}`, {size: 45,}),
+    pos(coinsImg.pos.x + 40, 20),
+    fixed(),
+    color(255, 255, 255)
+  ])
+  coinsLabel.onUpdate(() => {
+    coinsLabel.text = coins;
+  })
+  const scoreLabel = add([
+    text(`${score}`, {size: 30,}),
+    pos(width() - 100, 20),
     fixed(),
     color(255, 255, 255)
   ])
@@ -290,7 +346,7 @@ scene('play', () => {
   })
 
   onKeyDown('left', () => {
-    if(!player.crouch && !player.hit){
+    if(!player.crouch && !player.hit && !player.teleport){
       player.run = true;
       player.move(-SPEED, 0);
     }
@@ -298,7 +354,7 @@ scene('play', () => {
     player.dir = -1;
   })
   onKeyDown('right', () => {
-    if(!player.crouch && !player.hit){
+    if(!player.crouch && !player.hit && !player.teleport){
       player.run = true;
       player.move(SPEED, 0);
     }
@@ -309,7 +365,7 @@ scene('play', () => {
     player.run = false;
   })
   onKeyDown('down', () => {
-    if(!player.hit){
+    if(!player.hit && !player.teleport){
       player.crouch = true;
       player.area.height = 3;
     }
@@ -319,8 +375,9 @@ scene('play', () => {
     player.area.height = 8;
   })
   onKeyPress('a', () => {
-    if(!player.hit){
+    if(!player.hit && !player.teleport){
       if(player.grounded()){
+        play('jump', {volume: 0.3})
         player.jump(JUMP_FORCE);
       }
     }
@@ -332,7 +389,9 @@ scene('play', () => {
       l.scale.y = 1.5;
       l.unuse('patrol');
       l.destroyed = true;
+      createFX(vec2(l.pos.x, l.pos.y - 40), 'score', 10);
 			wait(0.2, () => destroy(l));
+      score += 10;
 			// addKaboom(player.pos)
 			// play("powerup")
 		}
@@ -349,24 +408,40 @@ scene('play', () => {
     if(!col.isBottom()){
       player.kbk = player.pos.x > d.pos.x ? 1 : -1;
       player.hurt(1);
+      play('hurt', {volume: 0.3})
     }
   })
   player.onCollide('box', (b, col) => {
     if(col.isTop()){
       if(!b.used){
-        createCoin(vec2(b.pos.x, b.pos.y - 50));
+        createFX(vec2(b.pos.x, b.pos.y - 50), 'coin');
+        play('coin', {volume: 0.3})
         b.used = true;
         score++;
+        coins++;
       }
     }
+  })
+  player.onCollide('door', (d) => {
+    player.teleport = true;
+    player.unuse('body');
   })
   player.onHurt(() => {
     player.hit = true;
   })
+  player.onAnimEnd('teleport', () => {
+    player.destroy();
+  })
 
   const handleAnim = () => {
     const anim = player.curAnim();
-    if(player.hit){
+    if(player.teleport){
+      if(anim !== 'teleport'){
+        player.play('teleport');
+        // wait(0.25, () => player.hit = false)
+      }
+    }
+    else if(player.hit){
       if(anim !== 'hurt'){
         player.play('hurt');
         wait(0.25, () => player.hit = false)
@@ -393,22 +468,49 @@ scene('play', () => {
 
   player.onUpdate(() => {
     handleAnim();
-    if(!player.isGrounded()){
-      player.fall = true;
-    }else {
-      player.fall = false;
+    if(player.is('body')){
+      if(!player.isGrounded()){
+        player.fall = true;
+      }else {
+        player.fall = false;
+      }
     }
-    if(player.pos.x > 390){
+    if(player.pos.x > 400){
       camPos(vec2(player.pos.x, 200));
     }else {
       camPos(vec2(390, 200))
     }
-    camScale(2)
+    camScale(1)
     // debug.log(player.walk)
 
     if(player.hit){
       player.move(player.kbk*DISPLACEMENT, 0);
     }
+
+    if(player.pos.y > 550){
+      go('game over', score);
+      music.stop();
+    }
   })
 })
-go('play')
+scene('game over', (SCORE) => {
+  add([
+    text('GAME OVER', {size: 80, width: width(),}),
+    pos(width()/2, height()/4),
+    origin('center'),
+    layer('ui'),
+    fixed(),
+  ])
+  add([
+    text('YOUR SCORE: ' + SCORE, {size: 30, width: width(),}),
+    pos(width()/2 - 150, height()/4 + 100),
+    origin('center'),
+  ])
+  onKeyPress('space', () => {
+    go('play');
+  })
+  onClick(() => {
+    go('play');
+  })
+})
+go('play', 1, 0, 0);
