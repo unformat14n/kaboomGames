@@ -110,6 +110,7 @@ function createFX(p, type, value){
         lifespan(0.5, {fade: 0.2}),
         move(UP, 30),
         scale(3),
+        layer('ui'),
         // shinny(),
         'coin',
       ])
@@ -168,8 +169,8 @@ const Game = {
         '                                                                                                                                                     ',
         '                                                                                                                                                     ',
         '                                                                                                                                                     ',
-        '                                                                                                                                                    ⎌',
-        '                            $    $$$                                                                                                                =',
+        '                            $                                                                                                                       ⎌',
+        '                                 $$$                                                                                                                =',
         '                                  s                                                                                                               =  ',
         '              $             =  =======  ===                            $       $      $$$$  b                    =   $                 b       =     ',
         '                            =             =     s                          g                           ==  =  =            g         s      =        ',
@@ -177,14 +178,14 @@ const Game = {
         ' ==========        ==========             ============  =  =   =   =  ===========                                    =                               ',
       ],
       [
-        '                $  -     ⇿     -                           $                                                                   $                     ',
+        '                   -     ⇿     -                           $                                                                   $                     ',
         '                                   -                       s         $$$$$$                                                                    ⎌     ',
         '                -    s                 -   ---   -   -  -------                                                                ------       ←        ',
         '                  -------  -                 -                 ---    ^ g ^                                                    -      -              ',
         '                              -              -                    ------------                                        b        -        -            ',
         '                        $   $    -    $$$$$$ -                                         b             $$$                       -          -          ',
         '       $    $    $                           -                                                                 ^^  g   ^^   -  -             -       ',
-        '                       ^  ^   ^     -------  -                                                     ^  s  ^   -------------                      -    ',
+        '                       ^  ^         -------  -                                                     ^  s  ^   -------------                      -    ',
         '     ^^  ^^     s   -----------------------  -                                ←                   ---------                   -     ^          -     ',
         '-------------------------------------------  -                                       S         -                               --  ---     ← --      ',
         '                                                                             -   -   -   -  -                                                        ',
@@ -300,7 +301,7 @@ const Game = {
       "$": () => [
         sprite('coin-box'),
         area({width: 8, height: 8}),
-        origin('bot'),
+        origin(vec2(-1.5, 0)),
         solid(),
         scale(4),
         shinny(),
@@ -344,29 +345,31 @@ const Game = {
         "door",
       ],
     },
-    music: ['level1', 'level2']
+    music: ['level1', 'level2'],
+    names: ['CASTLE OF MONSTERS', 'DUNGEONS OF DOOM']
   }
 }
 const SPEED = 185;
 const JUMP_FORCE = 550;
 const DISPLACEMENT = 180;
 const LAYERS = ['bg', 'environment', 'objects', 'fx', 'ui'];
-const LEVELS = ['THE CASTLE', 'DUNGEONS OF DOOM'];
+// const LEVELS = ['THE CASTLE', 'DUNGEONS OF DOOM'];
 
 /* ============  End of Constants  =============*/
 
 scene('play', (lvl, s, c) => {
 
-  debug.log(lvl);
+  // debug.log(lvl);
   // debug.log(debug.fps())
 
   add([
-    text(LEVELS[lvl-1], {size: 80,}),
+    text(Game.levels.names[lvl-1], {size: 80,}),
     pos(width()/2, height()/4),
     fixed(),
     origin('center'),
     layer('ui'),
-    lifespan(2, {fade: 1})
+    lifespan(2, {fade: 1}),
+    color(127, 86, 243),
   ])
   layers(LAYERS)
 
@@ -465,12 +468,13 @@ scene('play', (lvl, s, c) => {
 			player.jump(200);
       l.scale.y = 1.5;
       if(!l.destroyed){
-        createFX(vec2(l.pos.x, l.pos.y - 40), 'score', 10);
+        play('e-death', {volume: 0.3});
+        createFX(vec2(l.pos.x, l.pos.y - 40), 'score', 100);
       }
       l.unuse('patrol');
       l.destroyed = true;
 			wait(0.2, () => destroy(l));
-      score += 10;
+      score += 100;
 			// addKaboom(player.pos)
 			// play("powerup")
 		}
@@ -478,6 +482,7 @@ scene('play', (lvl, s, c) => {
   player.onGround((l) => {
 		if (l.is("invincible")) {
 			player.jump(600);
+      play('h-jump', {volume: 0.3});
 			// wait(0.2, () => destroy(l));
 			// addKaboom(player.pos)
 			// play("powerup")
@@ -496,7 +501,7 @@ scene('play', (lvl, s, c) => {
         createFX(vec2(b.pos.x, b.pos.y - 50), 'coin');
         play('coin', {volume: 0.3})
         b.used = true;
-        score++;
+        score+=10;
         coins++;
       }
     }
@@ -506,13 +511,19 @@ scene('play', (lvl, s, c) => {
     player.unuse('body');
   })
   player.onCollide('hazards', (h) => {
+    music.stop();
     go('game over', lvl, score, coins)
   })
   player.onHurt(() => {
     player.hit = true;
   })
   player.onAnimEnd('teleport', () => {
-    player.destroy();
+    go('play', lvl+1, score, coins);
+    music.stop();
+  })
+  player.onDeath(() => {
+    go('game over', lvl, score, coins);
+    music.stop();
   })
 
   const handleAnim = () => {
@@ -526,7 +537,7 @@ scene('play', (lvl, s, c) => {
     else if(player.hit){
       if(anim !== 'hurt'){
         player.play('hurt');
-        wait(0.25, () => player.hit = false)
+        wait(0.35, () => player.hit = false)
       }
     }
     else if(player.fall){
@@ -570,8 +581,8 @@ scene('play', (lvl, s, c) => {
     }
 
     if(player.pos.y > 550){
-      go('game over', lvl, score, coins);
       music.stop();
+      go('game over', lvl, score, coins);
     }
   })
 })
@@ -589,10 +600,10 @@ scene('game over', (lvl, SCORE, c) => {
     origin('center'),
   ])
   onKeyPress('space', () => {
-    go('play', lvl, SCORE, c);
+    go('play', lvl, 0, c);
   })
   onClick(() => {
-    go('play', lvl, SCORE, c);
+    go('play', lvl, 0, c);
   })
 })
-go('play', 2, 0, 0);
+go('play', 1, 0, 0);
