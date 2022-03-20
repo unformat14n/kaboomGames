@@ -3,15 +3,23 @@
 /*===============================================
 =                   Functions                   =
 =================================================*/
-function patrol(speed, dist){
+function patrol(speed, dist, opts){
   let limit = {};
   let dir = -1;
   return {
     id: 'patrol',
     require: ['area', 'pos', 'sprite'],
     add(){
-      limit.min = this.pos.x - dist;
-      limit.max = this.pos.x + dist;
+      // debug.log(opts)
+      if(opts != undefined){
+        if(opts == 'left'){
+          limit.min = this.pos.x - dist;
+          limit.max = this.pos.x;
+        }
+      }else {
+        limit.min = this.pos.x - dist;
+        limit.max = this.pos.x + dist;
+      }
     },
     update(){
       // if(type == 'skeleton'){
@@ -118,8 +126,9 @@ function createFX(p, type, value){
       break;
   }
 }
-function stalk(obj, speed){
+function stalk(speed){
   let offset = 500;
+  let obj = get('player')[0];
   // let dir = -1;
   return {
     id: 'stalk',
@@ -152,15 +161,204 @@ function stalk(obj, speed){
 =                   Constants                   =
 =================================================*/
 
+const Game = {
+  levels:{
+    maps: [
+      [
+        '                                                                                                                                                     ',
+        '                                                                                                                                                     ',
+        '                                                                                                                                                     ',
+        '                                                                                                                                                    ⎌',
+        '                            $    $$$                                                                                                                =',
+        '                                  s                                                                                                               =  ',
+        '              $             =  =======  ===                            $       $      $$$$  b                    =   $                 b       =     ',
+        '                            =             =     s                          g                           ==  =  =            g         s      =        ',
+        '       s     ====       z   =             ============                ===========  ==========     ⇿                        ⇿     =========           ',
+        ' ==========        ==========             ============  =  =   =   =  ===========                                    =                               ',
+      ],
+      [
+        '                $  -     ⇿     -                           $                                                                   $                     ',
+        '                                   -                       s         $$$$$$                                                                    ⎌     ',
+        '                -    s                 -   ---   -   -  -------                                                                ------       ←        ',
+        '                  -------  -                 -                 ---    ^ g ^                                                    -      -              ',
+        '                              -              -                    ------------                                        b        -        -            ',
+        '                        $   $    -    $$$$$$ -                                         b             $$$                       -          -          ',
+        '       $    $    $                           -                                                                 ^^  g   ^^   -  -             -       ',
+        '                       ^  ^   ^     -------  -                                                     ^  s  ^   -------------                      -    ',
+        '     ^^  ^^     s   -----------------------  -                                ←                   ---------                   -     ^          -     ',
+        '-------------------------------------------  -                                       S         -                               --  ---     ← --      ',
+        '                                                                             -   -   -   -  -                                                        ',
+      ],
+    ],
+    opts:  {
+      width: 40,
+      height: 40,
+      "=": () => [
+        sprite('tile', {frame: 0}),
+        area(),
+        solid(),
+        layer('environment'),
+        scale(5)
+      ],
+      "-": () => [
+        sprite('tiles', {frame: 0}),
+        area(),
+        solid(),
+        layer('environment'),
+        scale(5)
+      ],
+      "^": () => [
+        sprite('hazards', {frame: 0}),
+        area({width: 7, height: 3, offset: vec2(0, 22)}),
+        solid(),
+        layer('environment'),
+        scale(5),
+        origin('top'),
+        'hazards',
+      ],
+      "s": () => [
+        sprite('slime', {anim: 'idle'}),
+        area({width: 8, height: 4}),
+        origin('bot'),
+        solid(),
+        body(),
+        scale(5),
+        layer('objects'),
+        patrol(80, 50),
+        fakeBody(),
+        'enemy',
+        'dangerous',
+        {
+          destroyed: false,
+        }
+      ],
+      "g": () => [
+        sprite('ghost', {anim: 'idle'}),
+        area({width: 8, height: 8}),
+        origin('center'),
+        solid(),
+        layer('objects'),
+        // body(),
+        scale(5),
+        patrol(140, 150),
+        // fakeBody(),
+        'invincible',
+        'dangerous',
+        {
+          destroyed: false,
+        }
+      ],
+      "S": () => [
+        sprite('skull', {anim: 'idle'}),
+        area({width: 8, height: 8}),
+        origin('center'),
+        solid(),
+        layer('objects'),
+        // body(),
+        scale(5),
+        patrol(200, 240),
+        // fakeBody(),
+        'invincible',
+        'dangerous',
+        {
+          destroyed: false,
+        }
+      ],
+      "b": () => [
+        sprite('bat', {anim: 'idle'}),
+        area({width: 6, height: 4}),
+        origin('center'),
+        solid(),
+        // body(),
+        layer('objects'),
+        scale(5),
+        stalk(70),
+        // fakeBody(),
+        'enemy',
+        'dangerous',
+        'bat',
+        {
+          destroyed: false,
+        }
+      ],
+      "z": () => [
+        sprite('zombie', {anim: 'idle'}),
+        area({width: 8, height: 8}),
+        origin('bot'),
+        solid(),
+        body(),
+        scale(5),
+        patrol(50, 100),
+        fakeBody(),
+        'dangerous',
+        layer('objects'),
+        'invincible',
+        {
+          destroyed: false,
+        }
+      ],
+      "$": () => [
+        sprite('coin-box'),
+        area({width: 8, height: 8}),
+        origin('bot'),
+        solid(),
+        scale(4),
+        shinny(),
+        layer('environment'),
+        "box",
+        {
+          used: false,
+        }
+      ],
+      "⇿": () => [
+        sprite('mov-tile', {anim: 'idle'}),
+        area({width: 16, height: 8}),
+        origin('bot'),
+        solid(),
+        scale(5),
+        patrol(80, 150),
+        layer('environment'),
+        // shinny(),
+        "moving",
+      ],
+      "←": () => [
+        sprite('mov-tile', {anim: 'idle'}),
+        area({width: 16, height: 8}),
+        origin('bot'),
+        solid(),
+        scale(5),
+        patrol(80, 150, 'left'),
+        layer('environment'),
+        // shinny(),
+        "moving",
+      ],
+      "⎌": () => [
+        sprite('portal', {anim: 'idle'}),
+        area({width: 8, height: 8}),
+        origin(vec2(-0.5, 0.5)),
+        // solid(),
+        layer('environment'),
+        scale(5),
+        // patrol(80, 150),
+        // shinny(),
+        "door",
+      ],
+    },
+    music: ['level1', 'level2']
+  }
+}
 const SPEED = 185;
 const JUMP_FORCE = 550;
 const DISPLACEMENT = 180;
 const LAYERS = ['bg', 'environment', 'objects', 'fx', 'ui'];
-const LEVELS = ['THE CASTLE', 'DUNGEONS OF DOOM',]
+const LEVELS = ['THE CASTLE', 'DUNGEONS OF DOOM'];
 
 /* ============  End of Constants  =============*/
 
 scene('play', (lvl, s, c) => {
+
+  debug.log(lvl);
+  // debug.log(debug.fps())
 
   add([
     text(LEVELS[lvl-1], {size: 80,}),
@@ -172,7 +370,7 @@ scene('play', (lvl, s, c) => {
   ])
   layers(LAYERS)
 
-  const music = play('level1', {loop: true, volume: 0.25})
+  const music = play(Game.levels.music[lvl-1], {loop: true, volume: 0.25})
 
   const player = add([
     sprite('player', {anim: 'idle'}),
@@ -194,128 +392,7 @@ scene('play', (lvl, s, c) => {
     }
   ])
 
-  const map = addLevel([
-    '                                                                                                                                                     ',
-    '                                                                                                                                                     ',
-    '                                                                                                                                                     ',
-    '                                                                                                                                                    ☖',
-    '                            $    $$$                                                                                                                =',
-    '                                  s                                                                                                               =  ',
-    '              $             =  =======  ===                            $       $      $$$$  b                    =   $                 b       =     ',
-    '                            =             =     s                          g                           ==  =  =            g         s      =        ',
-    '       s     ====       z   =             ============                ===========  ==========     ⇿                        ⇿     =========           ',
-    ' ==========        ==========             ============  =  =   =   =  ===========                                    =                               ',
-  ], {
-    width: 40,
-    height: 40,
-    "=": () => [
-      sprite('tiles', {frame: 0}),
-      area(),
-      solid(),
-      layer('environment'),
-      scale(5)
-    ],
-    "s": () => [
-      sprite('slime', {anim: 'idle'}),
-      area({width: 8, height: 4}),
-      origin('bot'),
-      solid(),
-      body(),
-      scale(5),
-      layer('objects'),
-      patrol(80, 50),
-      fakeBody(),
-      'enemy',
-      'dangerous',
-      {
-        destroyed: false,
-      }
-    ],
-    "g": () => [
-      sprite('ghost', {anim: 'idle'}),
-      area({width: 8, height: 8}),
-      origin('center'),
-      solid(),
-      layer('objects'),
-      // body(),
-      scale(5),
-      patrol(140, 150),
-      // fakeBody(),
-      'invincible',
-      'dangerous',
-      {
-        destroyed: false,
-      }
-    ],
-    "b": () => [
-      sprite('bat', {anim: 'idle'}),
-      area({width: 6, height: 4}),
-      origin('center'),
-      solid(),
-      // body(),
-      layer('objects'),
-      scale(5),
-      stalk(player, 70),
-      // fakeBody(),
-      'enemy',
-      'dangerous',
-      'bat',
-      {
-        destroyed: false,
-      }
-    ],
-    "z": () => [
-      sprite('zombie', {anim: 'idle'}),
-      area({width: 8, height: 8}),
-      origin('bot'),
-      solid(),
-      body(),
-      scale(5),
-      patrol(50, 100),
-      fakeBody(),
-      'dangerous',
-      layer('objects'),
-      'invincible',
-      {
-        destroyed: false,
-      }
-    ],
-    "$": () => [
-      sprite('coin-box'),
-      area({width: 8, height: 8}),
-      origin('bot'),
-      solid(),
-      scale(4),
-      shinny(),
-      layer('environment'),
-      "box",
-      {
-        used: false,
-      }
-    ],
-    "⇿": () => [
-      sprite('mov-tile', {anim: 'idle'}),
-      area({width: 16, height: 8}),
-      origin('bot'),
-      solid(),
-      scale(5),
-      patrol(80, 150),
-      layer('environment'),
-      // shinny(),
-      "moving",
-    ],
-    "☖": () => [
-      sprite('portal', {anim: 'idle'}),
-      area({width: 8, height: 8}),
-      origin(vec2(-0.5, 0.5)),
-      // solid(),
-      layer('environment'),
-      scale(5),
-      // patrol(80, 150),
-      // shinny(),
-      "door",
-    ],
-  })
+  const map = addLevel(Game.levels.maps[lvl-1], Game.levels.opts);
   
   let score = s;
   let coins = c;
@@ -387,9 +464,11 @@ scene('play', (lvl, s, c) => {
 		if (l.is("enemy")) {
 			player.jump(200);
       l.scale.y = 1.5;
+      if(!l.destroyed){
+        createFX(vec2(l.pos.x, l.pos.y - 40), 'score', 10);
+      }
       l.unuse('patrol');
       l.destroyed = true;
-      createFX(vec2(l.pos.x, l.pos.y - 40), 'score', 10);
 			wait(0.2, () => destroy(l));
       score += 10;
 			// addKaboom(player.pos)
@@ -425,6 +504,9 @@ scene('play', (lvl, s, c) => {
   player.onCollide('door', (d) => {
     player.teleport = true;
     player.unuse('body');
+  })
+  player.onCollide('hazards', (h) => {
+    go('game over', lvl, score, coins)
   })
   player.onHurt(() => {
     player.hit = true;
@@ -488,12 +570,12 @@ scene('play', (lvl, s, c) => {
     }
 
     if(player.pos.y > 550){
-      go('game over', score);
+      go('game over', lvl, score, coins);
       music.stop();
     }
   })
 })
-scene('game over', (SCORE) => {
+scene('game over', (lvl, SCORE, c) => {
   add([
     text('GAME OVER', {size: 80, width: width(),}),
     pos(width()/2, height()/4),
@@ -507,10 +589,10 @@ scene('game over', (SCORE) => {
     origin('center'),
   ])
   onKeyPress('space', () => {
-    go('play');
+    go('play', lvl, SCORE, c);
   })
   onClick(() => {
-    go('play');
+    go('play', lvl, SCORE, c);
   })
 })
-go('play', 1, 0, 0);
+go('play', 2, 0, 0);

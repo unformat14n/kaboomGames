@@ -10,7 +10,7 @@
       height: window.innerHeight,
       background: [0,0,0],
       crisp: true,
-      font: 'amazing-font'
+      font: 'amazing-font',
     })
     loadSprite('player', 'assets/sprites/player.png', {
       sliceX: 4,
@@ -22,7 +22,7 @@
         fall: 8,
         crouch: 9,
         hurt: {from: 10, to: 11, speed: 6},
-        teleport: {from: 12, to: 24}
+        teleport: {from: 12, to: 24, speed: 12}
       }
     })
     loadSprite('slime', 'assets/sprites/slime.png', {
@@ -76,7 +76,15 @@
         idle: {from: 0, to: 1, loop: true, speed: 8},
       }
     })
-    loadSprite('tiles', 'assets/sprites/tiles.png', {
+    loadSprite('tile', 'assets/sprites/tiles.png', {
+      sliceX: 4,
+      sliceY: 1,
+    })
+    loadSprite('tiles', 'assets/sprites/tiles2.png', {
+      sliceX: 4,
+      sliceY: 1,
+    })
+    loadSprite('hazards', 'assets/sprites/hazards.png', {
       sliceX: 4,
       sliceY: 1,
     })
@@ -96,12 +104,21 @@
         idle: {from: 0, to: 3, loop: true, speed: 6}
       }
     })
+    loadSprite('skull', 'assets/sprites/skull.png', {
+      sliceX: 4,
+      sliceY: 1,
+      anims:
+      {
+        idle: {from: 0, to: 3, loop: true, speed: 8}
+      }
+    })
 
       // <!--=====================================
       // =                Sounds                =
       // ======================================-->
       // loadSound('level1', 'assets/sounds/dark-place.mp3');
       loadSound('level1', 'assets/sounds/the-castle.mp3');
+      loadSound('level2', 'assets/sounds/a-dirty-place.mp3');
       loadSound('jump', 'assets/sounds/jump2.wav');
       loadSound('hurt', 'assets/sounds/hurt2.wav');
       loadSound('coin', 'assets/sounds/coin.wav');
