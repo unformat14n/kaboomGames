@@ -88,6 +88,10 @@
       sliceX: 4,
       sliceY: 1,
     })
+    loadSprite('flowers', 'assets/sprites/flowers.png', {
+      sliceX: 4,
+      sliceY: 1,
+    })
     loadSprite('mov-tile', 'assets/sprites/mov-tile.png', {
       sliceX: 2,
       sliceY: 1,
@@ -112,6 +116,15 @@
         idle: {from: 0, to: 3, loop: true, speed: 8}
       }
     })
+    loadSprite('spring', 'assets/sprites/spring.png', {
+      sliceX: 2,
+      sliceY: 1,
+      anims:
+      {
+        idle: 0,
+        jump: 1,
+      }
+    })
 
       // <!--=====================================
       // =                Sounds                =
@@ -119,6 +132,7 @@
       // loadSound('level1', 'assets/sounds/dark-place.mp3');
       loadSound('level1', 'assets/sounds/the-castle.mp3');
       loadSound('level2', 'assets/sounds/a-dirty-place.mp3');
+      loadSound('level3', 'assets/sounds/flowers-in-the-ceil.mp3');
       loadSound('jump', 'assets/sounds/jump2.wav');
       loadSound('hurt', 'assets/sounds/hurt2.wav');
       loadSound('coin', 'assets/sounds/coin.wav');

@@ -190,6 +190,23 @@ const Game = {
         '-------------------------------------------  -                                       S         -                               --  ---     ← --      ',
         '                                                                             -   -   -   -  -                                                        ',
       ],
+      [
+        '                                                                        ^^                                                                           ',
+        '                                                                        ___   _   _                      S          ^^ S ^^                          ',
+        '                                                                     $$$             _        ⎌     s    ^^   s    _________ ^^   ^^        $        ',
+        '                                                                    s    s            _       _____________________         _________                ',
+        '                                                                  __________  ____     _                                             _               ',
+        '                                                                                        _                                             _              ',
+        '                                                                                         _                                                  ↑        ',
+        '                                                                                   ↑                                                        _        ',
+        '                                                     b                             _         ^^  ^                       S                           ',
+        '                                                                               ^           _________     s             _   _               ↑         ',
+        '   $                 $                         S                   ^^         _____                    _____                  ^  ^      ←  _         ',
+        '                             s     s   ________________  _   _   ______     ←                                 s    z       ________                  ',
+        '                     s    _____________________________  _   _                                              ___________                              ',
+        '_______  _  _  _  _____________________________________  _   _                                                                                       ',
+        '                                                                                                                                                     ',
+      ],
     ],
     opts:  {
       width: 40,
@@ -208,14 +225,37 @@ const Game = {
         layer('environment'),
         scale(5)
       ],
+      "f": () => [
+        sprite('flowers', {frame: randi(0, 3)}),
+        layer('fx'),
+        scale(5),
+        // origin('center')
+      ],
+      "_": () => [
+        sprite('tiles', {frame: 1}),
+        area(),
+        solid(),
+        // origin('bot'),
+        layer('environment'),
+        scale(5)
+      ],
       "^": () => [
         sprite('hazards', {frame: 0}),
         area({width: 7, height: 3, offset: vec2(0, 22)}),
         solid(),
         layer('environment'),
         scale(5),
-        origin('top'),
+        origin('topleft'),
         'hazards',
+      ],
+      "↑": () => [
+        sprite('spring', {anim: 'idle'}),
+        area({width: 7, height: 8, offset: vec2(0, 22)}),
+        solid(),
+        layer('environment'),
+        scale(5),
+        origin('topleft'),
+        'spring',
       ],
       "s": () => [
         sprite('slime', {anim: 'idle'}),
@@ -257,10 +297,11 @@ const Game = {
         layer('objects'),
         // body(),
         scale(5),
-        patrol(200, 240),
+        patrol(250, 240),
         // fakeBody(),
-        'invincible',
+        // 'invincible',
         'dangerous',
+        "xtra-dangerous",
         {
           destroyed: false,
         }
@@ -301,7 +342,7 @@ const Game = {
       "$": () => [
         sprite('coin-box'),
         area({width: 8, height: 8}),
-        origin(vec2(-1.5, 0)),
+        origin(vec2(-1.2, 0)),
         solid(),
         scale(4),
         shinny(),
@@ -345,15 +386,14 @@ const Game = {
         "door",
       ],
     },
-    music: ['level1', 'level2'],
-    names: ['CASTLE OF MONSTERS', 'DUNGEONS OF DOOM']
+    music: ['level1', 'level2', 'level3'],
+    names: ['CASTLE OF MONSTERS', 'DUNGEONS OF DOOM', 'UNCANNY GARDENS'],
   }
 }
 const SPEED = 185;
 const JUMP_FORCE = 550;
 const DISPLACEMENT = 180;
 const LAYERS = ['bg', 'environment', 'objects', 'fx', 'ui'];
-// const LEVELS = ['THE CASTLE', 'DUNGEONS OF DOOM'];
 
 /* ============  End of Constants  =============*/
 
@@ -363,13 +403,13 @@ scene('play', (lvl, s, c) => {
   // debug.log(debug.fps())
 
   add([
-    text(Game.levels.names[lvl-1], {size: 80,}),
+    text(Game.levels.names[lvl-1], {size: 80, width: width() - 50}),
     pos(width()/2, height()/4),
     fixed(),
     origin('center'),
     layer('ui'),
     lifespan(2, {fade: 1}),
-    color(127, 86, 243),
+    // color(127, 86, 243),
   ])
   layers(LAYERS)
 
@@ -378,7 +418,7 @@ scene('play', (lvl, s, c) => {
   const player = add([
     sprite('player', {anim: 'idle'}),
     scale(5),
-    pos(100, 140),
+    pos(120, 140),
     origin('bot'),
     body(),
     health(5),
@@ -394,6 +434,31 @@ scene('play', (lvl, s, c) => {
       teleport: false,
     }
   ])
+
+  onKeyPress('q', () => {
+    player.pos.x = get('door')[0].pos.x;
+    player.pos.y = get('door')[0].pos.y - 50
+  })
+
+  if(lvl == 3){
+    const decor = addLevel([
+        '                                                                                                                                                     ',
+        '                                                                                                                                                     ',
+        '                                                                                      f           f              f              f                    ',
+        '                                                                  f                                                                  f               ',
+        '                                                                                        f                                                            ',
+        '                                                                                                                                                     ',
+        '                                                                                                                                                     ',
+        '                                                                                                                                                     ',
+        '                                                                                                                       f                             ',
+        '                                                                                                       f                                             ',
+        '                                        f                f       f    f                                                                              ',
+        '                                f                                                                            f                                       ',
+        ' f             f        f                                                                                                                            ',
+        '                                                                                                                                                     ',
+        '                                                                                                                                                     ',
+    ], Game.levels.opts)
+  }
 
   const map = addLevel(Game.levels.maps[lvl-1], Game.levels.opts);
   
@@ -488,12 +553,32 @@ scene('play', (lvl, s, c) => {
 			// play("powerup")
 		}
 	})
+  player.onGround((l) => {
+		if (l.is("spring")) {
+			player.jump(900);
+      play('h-jump', {volume: 0.3, speed: 0.55});
+      if(l.curAnim() !== 'jump'){
+        l.play('jump');
+        wait(0.13, () => l.play('idle'))
+      }
+			// wait(0.2, () => destroy(l));
+			// addKaboom(player.pos)
+			// play("powerup")
+		}
+	})
   player.onCollide('dangerous', (d, col) => {
     if(!col.isBottom()){
       player.kbk = player.pos.x > d.pos.x ? 1 : -1;
       player.hurt(1);
       play('hurt', {volume: 0.3})
     }
+  })
+  player.onCollide('xtra-dangerous', (d, col) => {
+    // if(!col.isBottom()){
+      player.kbk = player.pos.x > d.pos.x ? 1 : -1;
+      player.hurt(1);
+      play('hurt', {volume: 0.3})
+    // }
   })
   player.onCollide('box', (b, col) => {
     if(col.isTop()){
