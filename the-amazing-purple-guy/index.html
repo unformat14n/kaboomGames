@@ -81,7 +81,7 @@
       sliceY: 1,
     })
     loadSprite('tiles', 'assets/sprites/tiles2.png', {
-      sliceX: 4,
+      sliceX: 4.000000000000001,
       sliceY: 1,
     })
     loadSprite('hazards', 'assets/sprites/hazards.png', {
@@ -116,6 +116,14 @@
         idle: {from: 0, to: 3, loop: true, speed: 8}
       }
     })
+    loadSprite('sorcerer-skull', 'assets/sprites/sorcerer-skull.png', {
+      sliceX: 4,
+      sliceY: 1,
+      anims:
+      {
+        idle: {from: 0, to: 3, loop: true, speed: 8}
+      }
+    })
     loadSprite('spring', 'assets/sprites/spring.png', {
       sliceX: 2,
       sliceY: 1,
@@ -123,6 +131,25 @@
       {
         idle: 0,
         jump: 1,
+      }
+    })
+    loadSprite('boss', 'assets/sprites/sorcerer.png', {
+      sliceX: 4,
+      sliceY: 5,
+      anims:
+      {
+        idle: {from: 0, to: 1, loop: true, speed: 5},
+        teleport: {from: 2, to: 11},
+        appear: {from: 12, to: 17},
+        attack: {from: 18, to: 18}
+      }
+    })
+    loadSprite('boss-screen', 'assets/sprites/sorcerer-screen.png', {
+      sliceX: 2,
+      sliceY: 3,
+      anims:
+      {
+        idle: {from: 0, to: 5, loop: true, speed: 6},
       }
     })
 
@@ -133,14 +160,17 @@
       loadSound('level1', 'assets/sounds/the-castle.mp3');
       loadSound('level2', 'assets/sounds/a-dirty-place.mp3');
       loadSound('level3', 'assets/sounds/flowers-in-the-ceil.mp3');
+      loadSound('level4', 'assets/sounds/where-filthiness-grows.mp3');
+      loadSound('main', 'assets/sounds/here-awaits-the-monster.mp3');
       loadSound('jump', 'assets/sounds/jump2.wav');
       loadSound('hurt', 'assets/sounds/hurt2.wav');
       loadSound('coin', 'assets/sounds/coin.wav');
       loadSound('e-death', 'assets/sounds/enemy-death.wav');
       loadSound('h-jump', 'assets/sounds/hyper-jump.wav');
+      loadSound('s-appear', 'assets/sounds/skull-appears.wav');
 
 
-      loadFont('amazing-font', 'assets/sprites/font.png', 8, 8.01, {chars: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890", wrap: 'clampToEdge'})
+      loadFont('amazing-font', 'assets/sprites/font.png', 8, 8.01, {chars: "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890:'.,!", wrap: 'clampToEdge'})
   </script>
   <script src="game.js"></script>
 </body>

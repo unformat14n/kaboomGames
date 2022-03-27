@@ -155,6 +155,161 @@ function stalk(speed){
     }
   }
 }
+function spawnSkull(p, type, dir){
+  add([
+    layer('fx'),
+    // fixed(),
+    sprite('sorcerer-skull', {anim: 'idle', flipX: type !== undefined ? (dir == 1 ? true : false) : false}),
+    pos(vec2(type !== undefined ? p.x : p.x + width() - 500, p.y)),
+    // solid(),
+    origin('bot'),
+    scale(5),
+    // fixed(),
+    // origin('center'),
+    move(type !== undefined ? dir : LEFT, 550),
+    area(),
+    "deadly",
+    // cleanup()
+    lifespan(3),
+  ])
+  play('s-appear', {volume: 0.3})
+}
+function checkState(){
+  let teleport = false;
+  let appear = false;
+  let idle = true;
+  let atk = false;
+  var t = 0;
+  return {
+    id: 'checkState',
+    require: ['pos', 'sprite', 'health'],
+    add(){
+      //nothing :)
+
+    },
+    update(){
+      this.onDeath(() => {
+        this.death = true;
+      })
+      if(Game.state.play.bossFight || !this.death){
+        const player = get('player')[0];
+        const handleAnim = () => {
+          if(idle){
+            if(this.curAnim() !== 'idle'){
+              this.play('idle');
+            }
+          }else if(atk) {
+            if(this.curAnim() !== 'attack'){
+              // debug.log('at')
+              spawnSkull(this.pos, 'HI', this.dir == 1 ? RIGHT : LEFT);
+              this.play('attack', {});
+            }
+          }else if(appear){
+            if(this.curAnim() !== 'appear'){
+              // debug.log('a')
+              this.play('appear', {onEnd: () => atk = true});
+            }
+          }
+          else {
+            if(this.curAnim() !== 'teleport'){
+              // debug.log('t')
+              this.play('teleport', {onEnd: () => {appear = true; this.pos.x = this.pos.x > player.pos.x ? 5300 : 5800;}});
+            }
+          }
+        }
+        handleAnim();
+        // const player = get('player')[0];
+        if(player.pos.x > this.pos.x){
+          this.dir = 1;
+          this.flipX(true);
+        }else {
+          this.dir = -1;
+          this.flipX(false);
+        }
+        if(t < 2){
+          idle = true;
+          t+=dt();
+        }
+        if(Math.floor(t) == 2){
+          idle = false;
+        }
+        this.onHurt(() => {
+          if(idle){
+            t = 2;
+            teleport = true;
+            idle = false;
+          }
+        })
+        if(teleport || appear){
+          this.solid = false;
+        }else{
+          this.solid = true;
+        }
+        // debug.log(t);
+        this.onAnimStart('teleport', () => {
+          teleport = true;
+        })
+        this.onAnimEnd('teleport', () => {
+          // this.pos.x = this.pos.x > player.pos.x ? 5300 : 5800;
+          teleport = false;
+        })
+        this.onAnimEnd('appear', () => {
+          // this.pos.x = this.pos.x > player.pos.x ? 5300 : 5800;
+          appear = false;
+        })
+        this.onAnimEnd('attack', () => {
+          t=0;
+          atk = false;
+        })
+      }
+    }
+  }
+}
+function spawnEnemy(){
+  let type = choose(['slime']);
+  if(type == 'slime'){
+    add([
+      sprite('slime', {anim: 'idle'}),
+      area({width: 8, height: 4}),
+      origin('bot'),
+      solid(),
+      pos(randi(5400, 5700), 40),
+      body(),
+      scale(5),
+      layer('objects'),
+      patrol(80, 50),
+      fakeBody(),
+      'enemy',
+      'dangerous',
+      {
+        destroyed: false,
+      }
+    ])
+  }else {
+    add([
+      sprite('bat', {anim: 'idle'}),
+      area({width: 6, height: 4}),
+      origin('center'),
+      solid(),
+      pos(randi(5300, 5800), randi(-10, 20)),
+      // body(),
+      layer('objects'),
+      scale(5),
+      stalk(70),
+      // fakeBody(),
+      'enemy',
+      'dangerous',
+      'bat',
+      {
+        destroyed: false,
+      }
+    ])
+  }
+}
+function initialize(){
+  Game.state.play.bossFight = false;
+  Game.state.score = 0;
+}
 
 /*============  End of Functions  =============*/
 
@@ -174,7 +329,7 @@ const Game = {
         '                                  s                                                                                                               =  ',
         '              $             =  =======  ===                            $       $      $$$$  b                    =   $                 b       =     ',
         '                            =             =     s                          g                           ==  =  =            g         s      =        ',
-        '       s     ====       z   =             ============                ===========  ==========     ⇿                        ⇿     =========           ',
+        ' ^     s     ====       z   =             ============                ===========  ==========     ⇿                        ⇿     =========           ',
         ' ==========        ==========             ============  =  =   =   =  ===========                                    =                               ',
       ],
       [
@@ -191,7 +346,7 @@ const Game = {
         '                                                                             -   -   -   -  -                                                        ',
       ],
       [
-        '                                                                        ^^                                                                           ',
+        '                                                                         ^                                                                           ',
         '                                                                        ___   _   _                      S          ^^ S ^^                          ',
         '                                                                     $$$             _        ⎌     s    ^^   s    _________ ^^   ^^        $        ',
         '                                                                    s    s            _       _____________________         _________                ',
@@ -205,6 +360,23 @@ const Game = {
         '                             s     s   ________________  _   _   ______     ←                                 s    z       ________                  ',
         '                     s    _____________________________  _   _                                              ___________                              ',
         '_______  _  _  _  _____________________________________  _   _                                                                                       ',
+        '                                                                                                                                                     ',
+      ],
+      [
+        '                                                                                                                                                     ',
+        '                                                                                                      S                                              ',
+        '                                    b                                                      ↑    ^^  ^^  ^^  ^^                                       ',
+        '                                                                                           □   □□□□□□□□□□□□□□□□                                      ',
+        '                                  b                                                                             ^^   s   ^^                          ',
+        '                                                                                                               □□□□□□□□□□□□□□                    B   ',
+        '                                b                                  b                      ↑                                    □□□□□□□□□□□□□□□□□□□□□□',
+        '                       g         s          S                                ^^   ^^   ^^ □                                                          ',
+        '       s  S  s     □□□□□□□□□  □□□□□□□□  □  □  □  □     s  ^  s   ^    ^     □□□□□□□□□□□□□□□                                                          ',
+        '□□□□□□□□□□□□□□□□□□□                                 □□□□□□□□□□□□□□□□□□□□□□                                                                           ',
+        '                                                                                                                                                     ',
+        '                                                                                                                                                     ',
+        '                                                                                                                                                     ',
+        '                                                                                                                                                     ',
         '                                                                                                                                                     ',
       ],
     ],
@@ -225,6 +397,14 @@ const Game = {
         layer('environment'),
         scale(5)
       ],
+      "□": () => [
+        sprite('tiles', {frame: 2}),
+        area(),
+        solid(),
+        layer('environment'),
+        scale(5),
+        // origin('center')
+      ],
       "f": () => [
         sprite('flowers', {frame: randi(0, 3)}),
         layer('fx'),
@@ -241,7 +421,7 @@ const Game = {
       ],
       "^": () => [
         sprite('hazards', {frame: 0}),
-        area({width: 7, height: 3, offset: vec2(0, 22)}),
+        area({width: 7, height: 3, offset: vec2(4, 22)}),
         solid(),
         layer('environment'),
         scale(5),
@@ -339,10 +519,29 @@ const Game = {
           destroyed: false,
         }
       ],
+      "B": () => [
+        sprite('boss', {anim: 'idle'}),
+        area({width: 20, height: 32}),
+        origin('bot'),
+        solid(),
+        body(),
+        scale(3),
+        health(10),
+        // patrol(50, 100),
+        fakeBody(),
+        'boss',
+        layer('objects'),
+        // state('idle', ['idle', 'teleport', 'attack']),
+        checkState(),
+        // 'invincible',
+        {
+          death: false,
+        }
+      ],
       "$": () => [
         sprite('coin-box'),
         area({width: 8, height: 8}),
-        origin(vec2(-1.2, 0)),
+        origin(vec2(-1.1, 0)),
         solid(),
         scale(4),
         shinny(),
@@ -386,8 +585,16 @@ const Game = {
         "door",
       ],
     },
-    music: ['level1', 'level2', 'level3'],
-    names: ['CASTLE OF MONSTERS', 'DUNGEONS OF DOOM', 'UNCANNY GARDENS'],
+    music: ['level1', 'level2', 'level3', 'level4'],
+    names: ['CASTLE OF MONSTERS', 'DUNGEONS OF DOOM', 'UNCANNY GARDENS', "THE SORCERE'S LAIR"],
+  },
+  state: {
+    play:
+    {
+      bossFight: false,
+      highscore: 0,
+      score: 0,
+    },
   }
 }
 const SPEED = 185;
@@ -396,14 +603,89 @@ const DISPLACEMENT = 180;
 const LAYERS = ['bg', 'environment', 'objects', 'fx', 'ui'];
 
 /* ============  End of Constants  =============*/
+scene('main', () => {
+  const music = play('main', {volume: 0.3, loop: true})
+  // add([
+  //   sprite('boss-screen', {anim: 'idle'}),
+  //   pos(width()/2, 500),
+  //   scale(15),
+  //   origin('center')
+  // ]);
+  add([
+    text('THE AMAZING PURPLE DUDE', {
+      size: 50,
+      transform: (idx, ch) => ({
+			  // color: hsl2rgb((time() * 0.2 + idx * 0.1) % 1, 0.7, 0.8),
+			  pos: vec2(0, wave(-6, 6, time() * 4 * 0.5)),
+			  // scale: wave(1, 1.2, time() * 3 + idx),
+			  // angle: wave(-9, 9, time() * 3 + idx),
+		  })
+    }),
+    color(255, 221, 71),
+    origin('center'),
+    pos(width()/2, height()/4),
+    z(10),
+  ])
+  add([
+    text('PRESS ANY KEY TO START', {size: 20, transform: (idx, ch) => ({
+        pos: vec2(0, wave(-3, 3, time() * 6 * 0.5)),
+      })
+    }),
+    pos(width()/2, height()/3),
+    origin('center'),
+  ])
+
+  onKeyPress(() => {
+    music.stop();
+    go('intro')
+  })
+})
+
+/*=======================================================================================================================================
+=                   SCENE INTRO                   =
+=======================================================================================================================================*/
+scene('intro', () => {
+  add([
+    text("IT ALL STARTED WITH A EXPLOSION... A HUGE AND BRIGHT EXPLOSION AT THE KING'S CASTLE. OH THEN... THINGS STARTED TO GET WEIRD, THE WORLD FELL INTO A GREAT DARKNESS, ALL BECAUSE THE SINDICATE OF SORCERERS USED THE PHILOSOPHER'S STONE. IT WAS TOO MUCH POWER, THE STONE WAS FRACTURED, AND EVERY MEMEBER OF THE SINDICATE TOOK ONE PIECE. BUT THERE WAS HOPE, THE HEROES OF EVERY REGION APPEARED TO DEFEAT EVERY SINGLE MEMBER OF THE SINDICATE. THAT'S HOW IT ALL STARTED, WITH ONE OF THE HEROES: PURPLE DUDE, GOING TO THE CASTLE.", {
+      size: 25,
+      width: width() - 50,
+      transform: (idx, ch) => ({
+			  pos: vec2(0, wave(-3, 3, time() * 3 * 0.5)),
+		  })
+    }),
+    // color(255, 221, 71),
+    origin('center'),
+    pos(width()/2, height()/2),
+    z(10),
+  ])
+  add([
+    text("PRESS ENTER TO CONTINUE...", {
+      size: 15,
+      transform: (idx, ch) => ({
+        pos: vec2(0, wave(-3, 3, time() * 5 * 0.5)),
+        opacity: wave(1, 0, time() * 8 * 0.5),
+      }),
+    }),
+    pos(width() - 500, height() - 100),
+    opacity(1),
+  ])
+  onKeyPress('enter', () => {
+    go('play', 4, 0, 0);
+  })
+})
+
+/*=======================================================================================================================================
+=                   SCENE PLAY                   =
+=======================================================================================================================================*/
 
 scene('play', (lvl, s, c) => {
-
-  // debug.log(lvl);
-  // debug.log(debug.fps())
+  initialize();
 
   add([
-    text(Game.levels.names[lvl-1], {size: 80, width: width() - 50}),
+    text(Game.levels.names[lvl-1], {
+      size: 80, 
+      width: width() - 50,
+    }),
     pos(width()/2, height()/4),
     fixed(),
     origin('center'),
@@ -435,11 +717,6 @@ scene('play', (lvl, s, c) => {
     }
   ])
 
-  onKeyPress('q', () => {
-    player.pos.x = get('door')[0].pos.x;
-    player.pos.y = get('door')[0].pos.y - 50
-  })
-
   if(lvl == 3){
     const decor = addLevel([
         '                                                                                                                                                     ',
@@ -452,16 +729,16 @@ scene('play', (lvl, s, c) => {
         '                                                                                                                                                     ',
         '                                                                                                                       f                             ',
         '                                                                                                       f                                             ',
-        '                                        f                f       f    f                                                                              ',
+        '                                        f                f            f                                                                              ',
         '                                f                                                                            f                                       ',
-        ' f             f        f                                                                                                                            ',
+        ' f                      f                                                                                                                            ',
         '                                                                                                                                                     ',
         '                                                                                                                                                     ',
     ], Game.levels.opts)
   }
 
   const map = addLevel(Game.levels.maps[lvl-1], Game.levels.opts);
-  
+
   let score = s;
   let coins = c;
   const coinsImg = add([
@@ -545,6 +822,12 @@ scene('play', (lvl, s, c) => {
 		}
 	})
   player.onGround((l) => {
+		if (l.is("boss")) {
+			player.jump(400);
+      l.hurt(1);
+		}
+	})
+  player.onGround((l) => {
 		if (l.is("invincible")) {
 			player.jump(600);
       play('h-jump', {volume: 0.3});
@@ -577,6 +860,13 @@ scene('play', (lvl, s, c) => {
     // if(!col.isBottom()){
       player.kbk = player.pos.x > d.pos.x ? 1 : -1;
       player.hurt(1);
+      play('hurt', {volume: 0.3})
+    // }
+  })
+  player.onCollide('deadly', (d, col) => {
+    // if(!col.isBottom()){
+      player.kbk = player.pos.x > d.pos.x ? 1 : -1;
+      player.hurt(10);
       play('hurt', {volume: 0.3})
     // }
   })
@@ -653,13 +943,22 @@ scene('play', (lvl, s, c) => {
         player.fall = false;
       }
     }
-    if(player.pos.x > 400){
-      camPos(vec2(player.pos.x, 200));
-    }else {
-      camPos(vec2(390, 200))
+    if(!Game.state.play.bossFight){
+      if(player.pos.x > 400){
+        camPos(vec2(player.pos.x, 200));
+      }else {
+        camPos(vec2(390, 200))
+      }
     }
     camScale(1)
     // debug.log(player.walk)
+
+    if(lvl == 4 && player.pos.x > 5378){
+      Game.state.play.bossFight = true
+      camPos(vec2(5379, 200));
+    }else {
+      camPos(vec2(player.pos.x, 200));
+    }
 
     if(player.hit){
       player.move(player.kbk*DISPLACEMENT, 0);
@@ -670,8 +969,39 @@ scene('play', (lvl, s, c) => {
       go('game over', lvl, score, coins);
     }
   })
+  let t = 0;
+  let t1 = 0;
+  onUpdate(() => {
+    Game.state.play.score = score;
+    if(lvl == 4){
+      t+=dt();
+      if(t >= 4){
+        // debug.log('send skull');
+        spawnSkull(player.pos)
+        wait(0.000001, () => t=0)
+      }
+    }
+  })
 })
+
+/*=======================================================================================================================================
+=                   GAME OVER SCREEN                                                                                                    =
+=======================================================================================================================================*/
 scene('game over', (lvl, SCORE, c) => {
+  if(Game.state.play.score > Game.state.play.highscore){
+    Game.state.play.highscore = Game.state.play.score;
+    add([
+      text('NEW HIGHSCORE!!', {
+        size: 12, 
+        transform: (idx, ch) => ({
+          pos: vec2(0, wave(3, -3, time() * 2 + idx * 0.5)),
+          color: hsl2rgb((time() * 0.2 + idx * 0.1) % 2, 0.7, 0.6),
+        })
+      }),
+      pos(width()/2 - 450, height()/4 + 160),
+      z(100),
+    ])
+  }
   add([
     text('GAME OVER', {size: 80, width: width(),}),
     pos(width()/2, height()/4),
@@ -684,11 +1014,31 @@ scene('game over', (lvl, SCORE, c) => {
     pos(width()/2 - 150, height()/4 + 100),
     origin('center'),
   ])
-  onKeyPress('space', () => {
+  add([
+    text('YOUR HIGHSCORE: ' + Game.state.play.highscore, {size: 30, width: width(),}),
+    pos(width()/2 - 150, height()/4 + 200),
+    origin('center'),
+    color(255, 221, 71),
+  ])
+  add([
+    text('CLICK OR PRESS ENTER TO RESTART', {
+      size: 15, 
+      // width: width(),
+      transform: (idx, ch) => ({
+        pos: vec2(0, wave(-3, 3, time() * 5 * 0.5)),
+        opacity: wave(1, 0, time() * 8 * 0.3),
+      }),
+    }),
+    opacity(1),
+    pos(width() - 300, height()/1.2),
+    origin('center'),
+    // color(255, 221, 71),
+  ])
+  onKeyPress('enter', () => {
     go('play', lvl, 0, c);
   })
   onClick(() => {
     go('play', lvl, 0, c);
   })
 })
-go('play', 1, 0, 0);
+go('main');
