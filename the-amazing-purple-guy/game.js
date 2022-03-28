@@ -190,8 +190,9 @@ function checkState(){
     update(){
       this.onDeath(() => {
         this.death = true;
+        go('outro')
       })
-      if(Game.state.play.bossFight || !this.death){
+      if(Game.state.play.bossFight && !this.death){
         const player = get('player')[0];
         const handleAnim = () => {
           if(idle){
@@ -364,7 +365,7 @@ const Game = {
       ],
       [
         '                                                                                                                                                     ',
-        '                                                                                                      S                                              ',
+        '                                                                                                                                                     ',
         '                                    b                                                      ↑    ^^  ^^  ^^  ^^                                       ',
         '                                                                                           □   □□□□□□□□□□□□□□□□                                      ',
         '                                  b                                                                             ^^   s   ^^                          ',
@@ -421,7 +422,7 @@ const Game = {
       ],
       "^": () => [
         sprite('hazards', {frame: 0}),
-        area({width: 7, height: 3, offset: vec2(4, 22)}),
+        area({width: 5, height: 3, offset: vec2(4, 22)}),
         solid(),
         layer('environment'),
         scale(5),
@@ -526,7 +527,7 @@ const Game = {
         solid(),
         body(),
         scale(3),
-        health(10),
+        health(5),
         // patrol(50, 100),
         fakeBody(),
         'boss',
@@ -700,7 +701,7 @@ scene('play', (lvl, s, c) => {
   const player = add([
     sprite('player', {anim: 'idle'}),
     scale(5),
-    pos(120, 140),
+    pos(5000, 140),
     origin('bot'),
     body(),
     health(5),
@@ -1040,5 +1041,11 @@ scene('game over', (lvl, SCORE, c) => {
   onClick(() => {
     go('play', lvl, 0, c);
   })
+})
+/*=======================================================================================================================================
+=                   OUTRO                                                                                                    =
+=======================================================================================================================================*/
+scene('outro', () => {
+  text('')
 })
 go('main');
