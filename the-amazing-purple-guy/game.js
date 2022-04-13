@@ -189,8 +189,8 @@ function checkState(){
     },
     update(){
       this.onDeath(() => {
+        Game.state.play.bossDefeated = true;
         this.death = true;
-        go('outro')
       })
       if(Game.state.play.bossFight && !this.death){
         const player = get('player')[0];
@@ -595,6 +595,7 @@ const Game = {
       bossFight: false,
       highscore: 0,
       score: 0,
+      bossDefeated: false,
     },
   }
 }
@@ -606,21 +607,55 @@ const LAYERS = ['bg', 'environment', 'objects', 'fx', 'ui'];
 /* ============  End of Constants  =============*/
 scene('main', () => {
   const music = play('main', {volume: 0.3, loop: true})
-  // add([
-  //   sprite('boss-screen', {anim: 'idle'}),
-  //   pos(width()/2, 500),
-  //   scale(15),
-  //   origin('center')
-  // ]);
+  add([
+    sprite('hand', {anim: 'idle'}),
+    pos(width()/1.4, height()/1.5 ),
+    scale(15),
+    origin('center'),
+    {
+      dir: 1,
+      speed: 20,
+    },
+    "misc",
+  ]);
+  add([
+    sprite('hand', {anim: 'idle', flipX: true,}),
+    pos(width()/3.4, height()/1.49 ),
+    scale(15),
+    origin('center'),
+    {
+      dir: 1,
+      speed: 20,
+    },
+    "misc",
+  ]);
+  add([
+    sprite('gem', {anim: 'idle',}),
+    pos(width()/2, height()/1.49 ),
+    scale(10  ),
+    origin('center'),
+    {
+      dir: 1,
+      speed: 10,
+    },
+    "misc",
+  ])
+  every('misc', (h) => {
+    const limit = {max: h.pos.y + 20, min: h.pos.y - 20}
+    h.onUpdate(() => {
+      if( h.pos.y > limit.max){
+        h.dir = -1
+      } 
+      if(h.pos.y < limit.min){
+        h.dir = 1
+      } 
+      h.move(0, h.speed*h.dir)
+    })
+  })
+  
   add([
     text('THE AMAZING PURPLE DUDE', {
       size: 50,
-      transform: (idx, ch) => ({
-			  // color: hsl2rgb((time() * 0.2 + idx * 0.1) % 1, 0.7, 0.8),
-			  pos: vec2(0, wave(-6, 6, time() * 4 * 0.5)),
-			  // scale: wave(1, 1.2, time() * 3 + idx),
-			  // angle: wave(-9, 9, time() * 3 + idx),
-		  })
     }),
     color(255, 221, 71),
     origin('center'),
@@ -671,7 +706,7 @@ scene('intro', () => {
     opacity(1),
   ])
   onKeyPress('enter', () => {
-    go('play', 4, 0, 0);
+    go('play', 1, 0, 0);
   })
 })
 
@@ -701,7 +736,7 @@ scene('play', (lvl, s, c) => {
   const player = add([
     sprite('player', {anim: 'idle'}),
     scale(5),
-    pos(5000, 140),
+    pos(120 , 140),
     origin('bot'),
     body(),
     health(5),
@@ -982,6 +1017,10 @@ scene('play', (lvl, s, c) => {
         wait(0.000001, () => t=0)
       }
     }
+    if(Game.state.play.bossDefeated){
+      music.stop();
+      go('outro')
+    }
   })
 })
 
@@ -1046,6 +1085,18 @@ scene('game over', (lvl, SCORE, c) => {
 =                   OUTRO                                                                                                    =
 =======================================================================================================================================*/
 scene('outro', () => {
-  text('')
+  add([
+    text("PURPLE DUDE DEFEATED ONE OF THE SORCERER. HE TOOK THE FRAGMENT OF THE PHILOSOPHER'S STONE AND RAN TO THE PALACE OF THE KING. BUT THE OTHER SORCERERS WERE AWARE OF THAT, PURPLE DUDE WAS NOT THE ONLY HERO IN THE KINGDOM, BUT IT WAS THE FIRST OF THEM WHO DEFEATED A SORCERER. MEANWHILE IN THE SOUTH REGION, A NEW HERO WAS RISING, AND THAT'S HOW A NEW ADVENTURE BEGINS.", {
+      size: 25,
+      width: width() - 50,
+      transform: (idx, ch) => ({
+			  pos: vec2(0, wave(-3, 3, time() * 3 * 0.5)),
+		  })
+    }),
+    // color(255, 221, 71),
+    origin('center'),
+    pos(width()/2, height()/2),
+    z(10),
+  ])
 })
 go('main');
