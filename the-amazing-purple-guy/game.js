@@ -898,7 +898,7 @@ scene('play', (lvl, s, c) => {
   const player = add([
     sprite('player', {anim: 'idle'}),
     scale(5),
-    pos(3500 , 140),
+    pos(140 , 140),
     origin('bot'),
     body(),
     health(5),
