@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## v0.1.2 (not released)
+## v0.1.2
 #### Added
 - Achievements
 - A healthbar
