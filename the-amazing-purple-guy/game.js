@@ -310,6 +310,47 @@ function spawnEnemy(){
 function initialize(){
   Game.state.play.bossFight = false;
   Game.state.score = 0;
+  Game.state.play.bossDefeated = false;
+}
+function achievement(a){
+  add([
+    text(a.id, {size: 15, width: 300,}),
+    pos(width() + 3, 100 + 3),
+    color(255, 222, 121),
+    layer('ui'),
+    z(10),
+    lifespan(10),
+    fixed(), 
+    "not",
+  ])
+  add([
+    text('NEW ACHIEVEMENT UNLOCKED!', {size: 15, width: 350,}),
+    pos(width() + 3, 120),
+    layer('ui'),
+    z(10),
+    lifespan(10),
+    fixed(), 
+    "not",
+  ])
+  add([
+    rect(400, 60),
+    color(0,0,0),
+    outline(5, rgb(255, 255, 255)),
+    pos(width(), 100),
+    // move(LEFT, 250),
+    layer('ui'),
+    lifespan(10),
+    fixed(),
+    "not",
+  ])
+  every('not', (n) => {
+    let a = 300;
+    n.onUpdate(() => {
+      n.move(-a, 0);
+      a -= 2.5;
+      // debug.log(a)
+    })
+  })
 }
 
 /*============  End of Functions  =============*/
@@ -339,7 +380,7 @@ const Game = {
         '                -    s                 -   ---   -   -  -------                                                                ------       ←        ',
         '                  -------  -                 -                 ---    ^ g ^                                                    -      -              ',
         '                              -              -                    ------------                                        b        -        -            ',
-        '                        $   $    -    $$$$$$ -                                         b             $$$                       -          -          ',
+        '                        $   $    -    $$$$$  -                                         b             $$$                       -          -          ',
         '       $    $    $                           -                                                                 ^^  g   ^^   -  -             -       ',
         '                       ^  ^         -------  -                                                     ^  s  ^   -------------                      -    ',
         '     ^^  ^^     s   -----------------------  -                                ←                   ---------                   -     ^          -     ',
@@ -554,7 +595,7 @@ const Game = {
       ],
       "⇿": () => [
         sprite('mov-tile', {anim: 'idle'}),
-        area({width: 16, height: 8}),
+        area({width: 16, height: 4}),
         origin('bot'),
         solid(),
         scale(5),
@@ -565,7 +606,7 @@ const Game = {
       ],
       "←": () => [
         sprite('mov-tile', {anim: 'idle'}),
-        area({width: 16, height: 8}),
+        area({width: 16, height: 4}),
         origin('bot'),
         solid(),
         scale(5),
@@ -595,8 +636,12 @@ const Game = {
       bossFight: false,
       highscore: 0,
       score: 0,
+      coins: 99,
       bossDefeated: false,
     },
+  },
+  achievements: {
+    "Like Scrooge McDuck": {state: false, condition: 100, id: 'LIKE SCROODGE MCDUCK'}
   }
 }
 const SPEED = 185;
@@ -663,18 +708,86 @@ scene('main', () => {
     z(10),
   ])
   add([
-    text('PRESS ANY KEY TO START', {size: 20, transform: (idx, ch) => ({
-        pos: vec2(0, wave(-3, 3, time() * 6 * 0.5)),
-      })
-    }),
-    pos(width()/2, height()/3),
+    rect(300, 50),
+    color(0,0,0),
+    outline(5, rgb(255, 255, 255)),
+    pos(width()/2, 300),
+    layer('ui'),
+    area(),
+    fixed(),
+    origin('center'),
+    "button",
+    {
+      scene: 'intro',
+    }
+  ])
+  add([
+    text('STORY MODE', {size: 20}),
+    pos(width()/2, 300),
+    layer('ui'),
+    fixed(),
+    origin('center'),
+  ])
+  add([
+    rect(300, 50),
+    color(0,0,0),
+    outline(5, rgb(255, 255, 255)),
+    pos(width()/2, 360),
+    layer('ui'),
+    area(),
+    fixed(),
+    origin('center'),
+    "button",
+    {
+      scene: 'achievements'
+    }
+  ])
+  add([
+    text('ACHIEVEMENTS', {size: 20}),
+    pos(width()/2, 360),
+    layer('ui'),
+    fixed(),
     origin('center'),
   ])
 
-  onKeyPress(() => {
-    music.stop();
-    go('intro')
+  every('button', (b) => {
+    b.onClick(() => {
+      music.stop()
+      go(b.scene);
+    })
   })
+})
+
+scene('achievements', () => {
+  add([
+    text('ACHIEVEMENTS', {size: 30, width: 580}),
+    origin('center'),
+    pos(width()/2, 40),
+    z(10),
+    color(255, 222, 121),
+  ])
+  add([
+    rect(600, 50),
+    color(0,0,0),
+    outline(5, rgb(255,255,255)),
+    pos(width()/2, 100),
+    origin('center')
+  ])
+  add([
+    text(Game.achievements["Like Scrooge McDuck"].state ? 'LIKE SCROODGE MCDUCK' : 'LOCKED', {size: 20, width: 580}),
+    origin('center'),
+    pos(width()/2, 90),
+    z(10),
+    color(255, 222, 121),
+  ])
+  if(Game.achievements["Like Scrooge McDuck"].state){
+    add([
+      text('COLLECT 100 COINS', {size: 10, width: 580}),
+      origin('center'),
+      pos(width()/2, 110),
+      z(10),
+    ])
+  }
 })
 
 /*=======================================================================================================================================
@@ -752,6 +865,39 @@ scene('play', (lvl, s, c) => {
       teleport: false,
     }
   ])
+  const redhb = add([
+    rect(400, 20),
+		pos(20, 100),
+		color(255, 72, 121),
+    outline(5, {r:217, g:33, b:61}),
+		fixed(),
+  ])
+  const healthbar = add([
+    rect(400, 20),
+    outline(5, {r:44, g:180, b:117}),
+		pos(20, 100),
+		color(127, 255, 127),
+		fixed(),
+    // origin('center'),
+		{
+			max: 5,
+			set(hp) {
+				this.width = 400 * hp / this.max
+				this.flash = true
+			},
+		},
+	])
+
+	healthbar.onUpdate(() => {
+		if (healthbar.flash) {
+			healthbar.color = rgb(255, 255, 255)
+      healthbar.outline.color = rgb(255, 255, 255)
+			wait(0.1, () => healthbar.flash = false)
+		} else {
+			healthbar.color = rgb(127, 255, 127)
+      healthbar.outline.color = rgb(44, 180, 117)
+		}
+	})
 
   if(lvl == 3){
     const decor = addLevel([
@@ -776,7 +922,7 @@ scene('play', (lvl, s, c) => {
   const map = addLevel(Game.levels.maps[lvl-1], Game.levels.opts);
 
   let score = s;
-  let coins = c;
+  // let coins = c;
   const coinsImg = add([
     sprite('coin'),
     pos(20, 20),
@@ -785,13 +931,13 @@ scene('play', (lvl, s, c) => {
     scale(5),
   ])
   const coinsLabel = add([
-    text(`${coins}`, {size: 45,}),
+    text(`${Game.state.play.coins}`, {size: 45,}),
     pos(coinsImg.pos.x + 40, 20),
     fixed(),
     color(255, 255, 255)
   ])
   coinsLabel.onUpdate(() => {
-    coinsLabel.text = coins;
+    coinsLabel.text = Game.state.play.coins;
   })
   const scoreLabel = add([
     text(`${score}`, {size: 30,}),
@@ -888,8 +1034,10 @@ scene('play', (lvl, s, c) => {
   player.onCollide('dangerous', (d, col) => {
     if(!col.isBottom()){
       player.kbk = player.pos.x > d.pos.x ? 1 : -1;
-      player.hurt(1);
-      play('hurt', {volume: 0.3})
+      if(!player.hit){
+        player.hurt(1);
+        play('hurt', {volume: 0.3})
+      }
     }
   })
   player.onCollide('xtra-dangerous', (d, col) => {
@@ -913,7 +1061,7 @@ scene('play', (lvl, s, c) => {
         play('coin', {volume: 0.3})
         b.used = true;
         score+=10;
-        coins++;
+        Game.state.play.coins++;
       }
     }
   })
@@ -923,17 +1071,18 @@ scene('play', (lvl, s, c) => {
   })
   player.onCollide('hazards', (h) => {
     music.stop();
-    go('game over', lvl, score, coins)
+    go('game over', lvl, score, Game.state.play.coins)
   })
   player.onHurt(() => {
     player.hit = true;
+    healthbar.set(player.hp());
   })
   player.onAnimEnd('teleport', () => {
-    go('play', lvl+1, score, coins);
+    go('play', lvl+1, score, Game.state.play.coins);
     music.stop();
   })
   player.onDeath(() => {
-    go('game over', lvl, score, coins);
+    go('game over', lvl, score, Game.state.play.coins);
     music.stop();
   })
 
@@ -1002,7 +1151,7 @@ scene('play', (lvl, s, c) => {
 
     if(player.pos.y > 550){
       music.stop();
-      go('game over', lvl, score, coins);
+      go('game over', lvl, score, Game.state.play.coins);
     }
   })
   let t = 0;
@@ -1021,6 +1170,10 @@ scene('play', (lvl, s, c) => {
       music.stop();
       go('outro')
     }
+    if(Game.state.play.coins >= Game.achievements["Like Scrooge McDuck"].condition && !Game.achievements["Like Scrooge McDuck"].state){
+      achievement(Game.achievements["Like Scrooge McDuck"])
+      Game.achievements["Like Scrooge McDuck"].state = true;
+    }
   })
 })
 
@@ -1028,6 +1181,7 @@ scene('play', (lvl, s, c) => {
 =                   GAME OVER SCREEN                                                                                                    =
 =======================================================================================================================================*/
 scene('game over', (lvl, SCORE, c) => {
+  const music = play('game-over', {volume: 0.3,});
   if(Game.state.play.score > Game.state.play.highscore){
     Game.state.play.highscore = Game.state.play.score;
     add([
@@ -1074,10 +1228,30 @@ scene('game over', (lvl, SCORE, c) => {
     origin('center'),
     // color(255, 221, 71),
   ])
+  add([
+    text('PRESS BACKSPACE TO GO BACK TO THE MAIN SCREEN', {
+      size: 15, 
+      // width: width(),
+      transform: (idx, ch) => ({
+        pos: vec2(0, wave(-3, 3, time() * 5 * 0.5)),
+        opacity: wave(1, 0, time() * 8 * 0.3),
+      }),
+    }),
+    opacity(1),
+    pos(width() - 300, height()/1.3),
+    origin('center'),
+    // color(255, 221, 71),
+  ])
   onKeyPress('enter', () => {
+    music.stop();
     go('play', lvl, 0, c);
   })
+  onKeyPress('backspace', () => {
+    music.stop();
+    go('main');
+  })
   onClick(() => {
+    music.stop();
     go('play', lvl, 0, c);
   })
 })
@@ -1098,5 +1272,27 @@ scene('outro', () => {
     pos(width()/2, height()/2),
     z(10),
   ])
+  add([
+    text('CLICK OR PRESS ENTER TO GO BACK TO THE MAIN SCREEN', {
+      size: 15, 
+      // width: width(),
+      transform: (idx, ch) => ({
+        pos: vec2(0, wave(-3, 3, time() * 5 * 0.5)),
+        opacity: wave(1, 0, time() * 8 * 0.3),
+      }),
+    }),
+    opacity(1),
+    pos(width() - 400, height()/1.2),
+    origin('center'),
+    // color(255, 221, 71),
+  ])
+  onKeyPress('enter', () => {
+    music.stop();
+    go('main');
+  })
+  onClick(() => {
+    music.stop();
+    go('main');
+  })
 })
 go('main');
