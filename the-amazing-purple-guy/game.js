@@ -322,6 +322,9 @@ function achievement(a){
     lifespan(10),
     fixed(), 
     "not",
+    {
+      a: 300,
+    }
   ])
   add([
     text('NEW ACHIEVEMENT UNLOCKED!', {size: 15, width: 350,}),
@@ -331,6 +334,9 @@ function achievement(a){
     lifespan(10),
     fixed(), 
     "not",
+    {
+      a: 300,
+    }
   ])
   add([
     rect(400, 60),
@@ -342,12 +348,15 @@ function achievement(a){
     lifespan(10),
     fixed(),
     "not",
+    {
+      a: 300,
+    }
   ])
   every('not', (n) => {
-    let a = 300;
+    // let a = 300;
     n.onUpdate(() => {
-      n.move(-a, 0);
-      a -= 2.5;
+      n.move(-n.a, 0);
+      n.a -= 2.5;
       // debug.log(a)
     })
   })
@@ -370,7 +379,7 @@ const Game = {
         '                                 $$$                                                                                                                =',
         '                                  s                                                                                                               =  ',
         '              $             =  =======  ===                            $       $      $$$$  b                    =   $                 b       =     ',
-        '                            =             =     s                          g                           ==  =  =            g         s      =        ',
+        '                            =             =     s                          g                           ==  =  =                      s      =        ',
         ' ^     s     ====       z   =             ============                ===========  ==========     ⇿                        ⇿     =========           ',
         ' ==========        ==========             ============  =  =   =   =  ===========                                    =                               ',
       ],
@@ -491,6 +500,7 @@ const Game = {
         fakeBody(),
         'enemy',
         'dangerous',
+        'slime',
         {
           destroyed: false,
         }
@@ -595,7 +605,7 @@ const Game = {
       ],
       "⇿": () => [
         sprite('mov-tile', {anim: 'idle'}),
-        area({width: 16, height: 4}),
+        area({width: 16, height: 4, offset: vec2(0, -14)}),
         origin('bot'),
         solid(),
         scale(5),
@@ -606,7 +616,7 @@ const Game = {
       ],
       "←": () => [
         sprite('mov-tile', {anim: 'idle'}),
-        area({width: 16, height: 4}),
+        area({width: 16, height: 4, offset: vec2(0, -4)}),
         origin('bot'),
         solid(),
         scale(5),
@@ -636,14 +646,19 @@ const Game = {
       bossFight: false,
       highscore: 0,
       score: 0,
-      coins: 99,
+      coins: 0,
       bossDefeated: false,
+      slimes: 0,
     },
   },
   achievements: {
-    "Like Scrooge McDuck": {state: false, condition: 100, id: 'LIKE SCROODGE MCDUCK'}
+    number: 3,
+    "Like Scrooge McDuck": {state: false, condition: {s: 'COLLECT 100 COINS', n: 100}, id: 'LIKE SCROODGE MCDUCK'},
+    "Slime Hunter": {state: false, condition: {s: 'KILL 30 SLIMES', n: 30}, id: 'SLIME HUNTER', },
+    "Score Master": {state: false, condition: {s: 'SCORE A 1000 IN ONE ATTEMP', n: 1000}, id: 'SCORE MASTER'}
   }
 }
+const ACHMNTS_NAMES = ["Like Scrooge McDuck", "Slime Hunter", "Score Master"];
 const SPEED = 185;
 const JUMP_FORCE = 550;
 const DISPLACEMENT = 180;
@@ -766,28 +781,62 @@ scene('achievements', () => {
     z(10),
     color(255, 222, 121),
   ])
-  add([
-    rect(600, 50),
-    color(0,0,0),
-    outline(5, rgb(255,255,255)),
-    pos(width()/2, 100),
-    origin('center')
-  ])
-  add([
-    text(Game.achievements["Like Scrooge McDuck"].state ? 'LIKE SCROODGE MCDUCK' : 'LOCKED', {size: 20, width: 580}),
-    origin('center'),
-    pos(width()/2, 90),
-    z(10),
-    color(255, 222, 121),
-  ])
-  if(Game.achievements["Like Scrooge McDuck"].state){
+  for(let i=0; i<Game.achievements.number; i++){
     add([
-      text('COLLECT 100 COINS', {size: 10, width: 580}),
+      rect(600, 50),
+      color(0,0,0),
+      outline(5, rgb(255,255,255)),
+      pos(width()/2, 100 + i*80),
       origin('center'),
-      pos(width()/2, 110),
-      z(10),
     ])
+    add([
+      sprite('achmnts', {frame: i,}),
+      origin('center'),
+      pos(300, 100+ i*80),
+      z('10'),
+      scale(4),
+      fixed(),
+    ])
+    add([
+      text(Game.achievements[ACHMNTS_NAMES[i]].state ? Game.achievements[ACHMNTS_NAMES[i]].id : 'LOCKED', {size: 20, width: 580}),
+      origin('center'),
+      pos(width()/2, 90+ i*80),
+      z(10),
+      color(255, 222, 121),
+      fixed(),
+    ])
+    if(Game.achievements[ACHMNTS_NAMES[i]].state){
+      add([
+        text(Game.achievements[ACHMNTS_NAMES[i]].condition.s, {size: 10, width: 580}),
+        origin('center'),
+        pos(width()/2, 110+ i*80),
+        z(10),
+        fixed(),
+      ])
+    }
   }
+  add([
+    text('CLICK OR PRESS ENTER TO GO BACK TO THE MAIN SCREEN', {
+      size: 15, 
+      // width: width(),
+      transform: (idx, ch) => ({
+        pos: vec2(0, wave(-3, 3, time() * 5 * 0.5)),
+        opacity: wave(1, 0, time() * 8 * 0.3),
+      }),
+    }),
+    opacity(1),
+    pos(width() - 400, height()/1.2),
+    origin('center'),
+    // color(255, 221, 71),
+  ])
+  onKeyPress('enter', () => {
+    // music.stop();
+    go('main');
+  })
+  onClick(() => {
+    // music.stop();
+    go('main');
+  })
 })
 
 /*=======================================================================================================================================
@@ -849,7 +898,7 @@ scene('play', (lvl, s, c) => {
   const player = add([
     sprite('player', {anim: 'idle'}),
     scale(5),
-    pos(120 , 140),
+    pos(3500 , 140),
     origin('bot'),
     body(),
     health(5),
@@ -999,6 +1048,9 @@ scene('play', (lvl, s, c) => {
       l.destroyed = true;
 			wait(0.2, () => destroy(l));
       score += 100;
+      if(l.is('slime')){
+        Game.state.play.slimes++;
+      }
 			// addKaboom(player.pos)
 			// play("powerup")
 		}
@@ -1157,6 +1209,7 @@ scene('play', (lvl, s, c) => {
   let t = 0;
   let t1 = 0;
   onUpdate(() => {
+    // onError()
     Game.state.play.score = score;
     if(lvl == 4){
       t+=dt();
@@ -1170,9 +1223,17 @@ scene('play', (lvl, s, c) => {
       music.stop();
       go('outro')
     }
-    if(Game.state.play.coins >= Game.achievements["Like Scrooge McDuck"].condition && !Game.achievements["Like Scrooge McDuck"].state){
+    if(Game.state.play.coins >= Game.achievements["Like Scrooge McDuck"].condition.n && !Game.achievements["Like Scrooge McDuck"].state){
       achievement(Game.achievements["Like Scrooge McDuck"])
       Game.achievements["Like Scrooge McDuck"].state = true;
+    }
+    if(Game.state.play.slimes >= Game.achievements['Slime Hunter'].condition.n && !Game.achievements['Slime Hunter'].state){
+      achievement(Game.achievements["Slime Hunter"])
+      Game.achievements["Slime Hunter"].state = true;
+    }
+    if(Game.state.play.score >= Game.achievements['Score Master'].condition.n && !Game.achievements['Score Master'].state){
+      achievement(Game.achievements["Score Master"])
+      Game.achievements["Score Master"].state = true;
     }
   })
 })
