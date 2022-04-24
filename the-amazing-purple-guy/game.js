@@ -15,6 +15,9 @@ function patrol(speed, dist, opts){
         if(opts == 'left'){
           limit.min = this.pos.x - dist;
           limit.max = this.pos.x;
+        }else if(opts == 'up'){
+          limit.min = this.pos.y - 2*dist;
+          limit.max = this.pos.y;
         }
       }else {
         limit.min = this.pos.x - dist;
@@ -22,16 +25,32 @@ function patrol(speed, dist, opts){
       }
     },
     update(){
+      // let flip = this.flipX ? false : true
       // if(type == 'skeleton'){
-        if(this.pos.x < limit.min){
-          dir = 1;
-          this.flipX(false);
+        if(opts == 'up'){
+          if(this.pos.y < limit.min){
+            // debug.log(`${this.pos.y}, ${limit.min}`);
+            dir = 1;
+            // this.flipX(false);
+          }
+          if(this.pos.y > limit.max){
+            // debug.log(`${this.pos.y}, ${limit.min}`);
+            dir = -1;
+            // this.flipX(true);
+          }
+          // console.log(limit);
+          this.move(0, speed*dir);
+        }else {
+          if(this.pos.x < limit.min){
+            dir = 1;
+            this.flipX(false);
+          }
+          if(this.pos.x > limit.max){
+            dir = -1;
+            this.flipX(true);
+          }
+          this.move(speed*dir, 0);
         }
-        if(this.pos.x > limit.max){
-          dir = -1;
-          this.flipX(true);
-        }
-        this.move(speed*dir, 0);
       // }
     }
   }
@@ -320,7 +339,7 @@ function achievement(a){
     layer('ui'),
     z(10),
     lifespan(10),
-    fixed(), 
+    fixed(),
     "not",
     {
       a: 300,
@@ -332,7 +351,7 @@ function achievement(a){
     layer('ui'),
     z(10),
     lifespan(10),
-    fixed(), 
+    fixed(),
     "not",
     {
       a: 300,
@@ -359,6 +378,105 @@ function achievement(a){
       n.a -= 2.5;
       // debug.log(a)
     })
+  })
+}
+function spawnButton(t, y, s){
+  add([
+    rect(300, 50),
+    color(0,0,0),
+    outline(5, rgb(255, 255, 255)),
+    pos(width()/2, y),
+    layer('ui'),
+    area(),
+    fixed(),
+    origin('center'),
+    "button",
+    {
+      scene: s,
+    }
+  ])
+  add([
+    text(t, {size: 20}),
+    pos(width()/2, y),
+    layer('ui'),
+    fixed(),
+    origin('center'),
+  ])
+}
+function spawnAccesory(f, n, state, c, p){
+  add([
+    rect(100, 100),
+    color(0,0,0),
+    outline(5, rgb(255, 255, 255)),
+    pos(p),
+    layer('ui'),
+    area(),
+    fixed(),
+    origin('center'),
+    "article",
+    {
+      sold: state.sold,
+      inUse: state.inUse,
+      name: n,
+      cost: c,
+    }
+  ])
+  add([
+    sprite('hats', {frame: f}),
+    pos(p),
+    scale(10),
+    fixed(),
+    layer('ui'),
+    origin(vec2(0.3, -0.7)),
+  ])
+  add([
+    text(`${c}`, {size: 20}),
+    pos(p),
+    // scale(10),
+    fixed(),
+    layer('ui'),
+    origin(vec2(0 , -3.5)),
+  ])
+}
+function accesoryLife(acc, obj){
+  let s = '';
+  const a = add([
+    sprite('hats', {frame: acc.frame}),
+    pos(obj.pos),
+    follow(obj),
+    scale(5),
+    layer('fx'),
+    origin('bot'),
+  ]);
+  if(acc.id == 'b-hat'){
+    s = 'hat';
+  }else {
+    s = 'flower';
+  }
+  a.onUpdate(() => {
+    if(obj.dir > 0){
+      a.flipX(false);
+    }else {
+      a.flipX(true);
+    }
+
+    if(obj.run || obj.fall){
+      if(a.curAnim() !== `${s}Action`){
+        a.play(`${s}Action`)
+      }
+    }else if(obj.crouch){
+      if(a.curAnim() !== `${s}Crouch`){
+        a.play(`${s}Crouch`)
+      }
+    }else if(obj.hit){
+      if(a.curAnim() !== `${s}Hurt`){
+        a.play(`${s}Hurt`)
+      }
+    }else {
+      if(a.curAnim() !== `${s}Idle`){
+        a.play(`${s}Idle`)
+      }
+    }
   })
 }
 
@@ -398,7 +516,7 @@ const Game = {
       ],
       [
         '                                                                         ^                                                                           ',
-        '                                                                        ___   _   _                      S          ^^ S ^^                          ',
+        '                                                                        ___  _   _                       S          ^^ S ^^                          ',
         '                                                                     $$$             _        ⎌     s    ^^   s    _________ ^^   ^^        $        ',
         '                                                                    s    s            _       _____________________         _________                ',
         '                                                                  __________  ____     _                                             _               ',
@@ -429,6 +547,24 @@ const Game = {
         '                                                                                                                                                     ',
         '                                                                                                                                                     ',
         '                                                                                                                                                     ',
+      ],
+      [
+        '                                                                                                                                                                               ',
+        '                                                                                                                       =  =  =  =   =                                          ',
+        '                                                                                                                         v        v   =      $$$$                              ',
+        '                                                                                                                     ↑                  =      g       $$$                     ',
+        '                                                                                                                     ========           =      s                               ',
+        '                                                                                                                            g           =  ==========   s                      ',
+        '                                                                                                                              ↑         =            ========                  ',
+        '                                                                                                                              ===       =                                   k  ',
+        '                                ↑                                                                                                g      =                      ================',
+        '                    =   =   =   =               $$$$$$$                    b      $$    b                                          ↑    =                                      ',
+        '                      v       v                                                                                                    ==   =                                      ',
+        '                                                                       ^    *    s    *     ^                                           =                                      ',
+        '              *    ↑                         *     s     *      ↑    =========================         s                                =                                      ',
+        '     ^  ============                 ============================                                =  ========  = = = =  =        *     ↑ =                                      ',
+        '====================                                                                                           v   v       ==============                                       ',
+        '                                                                                                                                                                               ',
       ],
     ],
     opts:  {
@@ -472,7 +608,7 @@ const Game = {
       ],
       "^": () => [
         sprite('hazards', {frame: 0}),
-        area({width: 5, height: 3, offset: vec2(4, 22)}),
+        area({width: 6, height: 3, offset: vec2(5.5, 22)}),
         solid(),
         layer('environment'),
         scale(5),
@@ -505,6 +641,22 @@ const Game = {
           destroyed: false,
         }
       ],
+      "*": () => [
+        sprite('spike-slime', {anim: 'idle'}),
+        area({width: 8, height: 4}),
+        origin('bot'),
+        solid(),
+        body(),
+        scale(5),
+        layer('objects'),
+        patrol(80, 100),
+        fakeBody(),
+        'dangerous',
+        'spike',
+        {
+          destroyed: false,
+        }
+      ],
       "g": () => [
         sprite('ghost', {anim: 'idle'}),
         area({width: 8, height: 8}),
@@ -517,6 +669,22 @@ const Game = {
         // fakeBody(),
         'invincible',
         'dangerous',
+        {
+          destroyed: false,
+        }
+      ],
+      "v": () => [
+        sprite('skull-v', {anim: 'idle'}),
+        area({width: 8, height: 8}),
+        origin('left'),
+        solid(),
+        layer('objects'),
+        // body(),
+        scale(5),
+        patrol(150, 100, 'up'),
+        // fakeBody(),
+        'invincible',
+        'deadly',
         {
           destroyed: false,
         }
@@ -593,7 +761,7 @@ const Game = {
       "$": () => [
         sprite('coin-box'),
         area({width: 8, height: 8}),
-        origin(vec2(-1.1, 0)),
+        origin(vec2(-1.1, -1)),
         solid(),
         scale(4),
         shinny(),
@@ -627,18 +795,15 @@ const Game = {
       ],
       "⎌": () => [
         sprite('portal', {anim: 'idle'}),
-        area({width: 8, height: 8}),
+        area({width: 4, height: 4, offset: vec2(20, -5)}),
         origin(vec2(-0.5, 0.5)),
-        // solid(),
         layer('environment'),
         scale(5),
-        // patrol(80, 150),
-        // shinny(),
         "door",
       ],
     },
-    music: ['level1', 'level2', 'level3', 'level4'],
-    names: ['CASTLE OF MONSTERS', 'DUNGEONS OF DOOM', 'UNCANNY GARDENS', "THE SORCERE'S LAIR"],
+    music: ['level1', 'level2', 'level3', 'level4', 'level5'],
+    names: ['CASTLE OF MONSTERS', 'DUNGEONS OF DOOM', 'UNCANNY GARDENS', "THE SORCERE'S LAIR", "THE CURSED CASTLE"],
   },
   state: {
     play:
@@ -646,7 +811,7 @@ const Game = {
       bossFight: false,
       highscore: 0,
       score: 0,
-      coins: 0,
+      coins: 100,
       bossDefeated: false,
       slimes: 0,
     },
@@ -656,17 +821,25 @@ const Game = {
     "Like Scrooge McDuck": {state: false, condition: {s: 'COLLECT 100 COINS', n: 100}, id: 'LIKE SCROODGE MCDUCK'},
     "Slime Hunter": {state: false, condition: {s: 'KILL 30 SLIMES', n: 30}, id: 'SLIME HUNTER', },
     "Score Master": {state: false, condition: {s: 'SCORE A 1000 IN ONE ATTEMP', n: 1000}, id: 'SCORE MASTER'}
+  },
+  accesories: {
+    "b-hat": {frame: 0, id: "b-hat", state: {sold: false}, cost: 25},
+    "flower": {frame: 4, id: "flower", state: {sold: false}, cost: 25},
+    number: 2,
+    inUse: null,
   }
 }
 const ACHMNTS_NAMES = ["Like Scrooge McDuck", "Slime Hunter", "Score Master"];
+const ACCESORIES_NAMES = ["b-hat", "flower"];
 const SPEED = 185;
 const JUMP_FORCE = 550;
 const DISPLACEMENT = 180;
 const LAYERS = ['bg', 'environment', 'objects', 'fx', 'ui'];
 
+let music = play('main', {volume: 0.3, loop: true});
 /* ============  End of Constants  =============*/
 scene('main', () => {
-  const music = play('main', {volume: 0.3, loop: true})
+  music.play();
   add([
     sprite('hand', {anim: 'idle'}),
     pos(width()/1.4, height()/1.5 ),
@@ -705,74 +878,35 @@ scene('main', () => {
     h.onUpdate(() => {
       if( h.pos.y > limit.max){
         h.dir = -1
-      } 
+      }
       if(h.pos.y < limit.min){
         h.dir = 1
-      } 
+      }
       h.move(0, h.speed*h.dir)
     })
   })
-  
+
   add([
     text('THE AMAZING PURPLE DUDE', {
       size: 50,
     }),
     color(255, 221, 71),
     origin('center'),
-    pos(width()/2, height()/4),
+    pos(width()/2, 130),
     z(10),
   ])
-  add([
-    rect(300, 50),
-    color(0,0,0),
-    outline(5, rgb(255, 255, 255)),
-    pos(width()/2, 300),
-    layer('ui'),
-    area(),
-    fixed(),
-    origin('center'),
-    "button",
-    {
-      scene: 'intro',
-    }
-  ])
-  add([
-    text('STORY MODE', {size: 20}),
-    pos(width()/2, 300),
-    layer('ui'),
-    fixed(),
-    origin('center'),
-  ])
-  add([
-    rect(300, 50),
-    color(0,0,0),
-    outline(5, rgb(255, 255, 255)),
-    pos(width()/2, 360),
-    layer('ui'),
-    area(),
-    fixed(),
-    origin('center'),
-    "button",
-    {
-      scene: 'achievements'
-    }
-  ])
-  add([
-    text('ACHIEVEMENTS', {size: 20}),
-    pos(width()/2, 360),
-    layer('ui'),
-    fixed(),
-    origin('center'),
-  ])
+  spawnButton('STORY MODE', 200, 'intro');
+  spawnButton('ACHIEVEMENTS', 260, 'achievements');
+  spawnButton('EXTRA CONTENT', 320, 'xtra');
+  spawnButton('SHOP', 380, 'shop');
 
   every('button', (b) => {
     b.onClick(() => {
-      music.stop()
       go(b.scene);
+      music.stop();
     })
   })
 })
-
 scene('achievements', () => {
   add([
     text('ACHIEVEMENTS', {size: 30, width: 580}),
@@ -817,7 +951,7 @@ scene('achievements', () => {
   }
   add([
     text('CLICK OR PRESS ENTER TO GO BACK TO THE MAIN SCREEN', {
-      size: 15, 
+      size: 15,
       // width: width(),
       transform: (idx, ch) => ({
         pos: vec2(0, wave(-3, 3, time() * 5 * 0.5)),
@@ -836,6 +970,111 @@ scene('achievements', () => {
   onClick(() => {
     // music.stop();
     go('main');
+  })
+})
+scene('xtra', () => {
+  add([
+    text('EXTRA CONTENT', {size: 30, width: 580}),
+    origin('center'),
+    pos(width()/2, 40),
+    z(10),
+    color(255, 222, 121),
+  ])
+  add([
+    text('THIS ADDITIONAL CONTENT FOLLOWS  THE END OF THE STORY MODE OF THE GAME. IF YOU WANT TO UNDERSTAND THE THINGS THAT HAPPENED BEFORE, WE RECOMMEND YOU TO PLAY THE STORY MODE FIRST', {
+      size: 20,
+      width: width() - 50,
+      transform: (idx, ch) => ({
+        pos: vec2(0, wave(-3, 3, time() * 5 * 0.5)),
+      }),
+    }),
+    pos(width()/2, 200),
+    origin('center'),
+  ])
+  add([
+    text('PRESS BACKSPACE TO GO BACK TO THE MAIN SCREEN', {
+      size: 15,
+      // width: width(),
+      transform: (idx, ch) => ({
+        pos: vec2(0, wave(-3, 3, time() * 5 * 0.5)),
+        opacity: wave(1, 0, time() * 8 * 0.3),
+      }),
+    }),
+    opacity(1),
+    pos(width() - 400, height()/1.2),
+    origin('center'),
+    // color(255, 221, 71),
+  ])
+  add([
+    text('THE CURSED CASTLE', {size: 15}),
+    pos(width()/2, 420),
+    layer('ui'),
+    fixed(),
+    origin('center'),
+    z(10),
+  ])
+  add([
+    rect(300, 50),
+    color(0,0,0),
+    outline(5, rgb(255, 255, 255)),
+    pos(width()/2, 420),
+    layer('ui'),
+    area(),
+    fixed(),
+    origin('center'),
+    "button",
+  ])
+  every('button', (b) => {
+    b.onClick(() => {
+      // music.stop()
+      go('play', 5, Game.state.play.highscore, Game.coins);
+    })
+  })
+  onKeyPress('backspace', () => {
+    // music.stop();
+    go('main');
+  })
+})
+scene('shop', () => {
+  for(let i=0; Game.accesories.number > i; i++){
+    spawnAccesory(Game.accesories[ACCESORIES_NAMES[i]].frame, Game.accesories[ACCESORIES_NAMES[i]].id, Game.accesories[ACCESORIES_NAMES[i]].state, Game.accesories[ACCESORIES_NAMES[i]].cost, vec2(width()/2, 200 + i*120));
+  }
+  const coinsImg = add([
+    sprite('coin'),
+    pos(20, 20),
+    fixed(),
+    layer('ui'),
+    scale(5),
+  ])
+  const coinsLabel = add([
+    text(`${Game.state.play.coins}`, {size: 45,}),
+    pos(coinsImg.pos.x + 40, 20),
+    fixed(),
+    color(255, 255, 255)
+  ])
+  coinsLabel.onUpdate(() => {
+    coinsLabel.text = Game.state.play.coins;
+  })
+
+  every('article', (a) => {
+    a.onClick(() => {
+      if(!Game.accesories[a.name].state.sold){
+        if(Game.state.play.coins > a.cost){
+          Game.state.play.coins -= a.cost
+          Game.accesories[a.name].state.sold = true;
+          play('sold', {volume: 0.35})
+        }else {
+          play('blocked', {volume: 0.35})
+        }
+      }
+      else{
+        Game.accesories.inUse = Game.accesories[a.name];
+        play('use', {volume: 0.35})
+      }
+    })
+    onKeyPress('enter', () => {
+      go('main');
+    })
   })
 })
 
@@ -881,7 +1120,7 @@ scene('play', (lvl, s, c) => {
 
   add([
     text(Game.levels.names[lvl-1], {
-      size: 80, 
+      size: 80,
       width: width() - 50,
     }),
     pos(width()/2, height()/4),
@@ -898,7 +1137,7 @@ scene('play', (lvl, s, c) => {
   const player = add([
     sprite('player', {anim: 'idle'}),
     scale(5),
-    pos(140 , 140),
+    pos(120 , 140),
     origin('bot'),
     body(),
     health(5),
@@ -914,6 +1153,9 @@ scene('play', (lvl, s, c) => {
       teleport: false,
     }
   ])
+  if(Game.accesories.inUse !== null){
+    accesoryLife(Game.accesories.inUse, player)
+  }
   const redhb = add([
     rect(400, 20),
 		pos(20, 100),
@@ -1054,6 +1296,10 @@ scene('play', (lvl, s, c) => {
 			// addKaboom(player.pos)
 			// play("powerup")
 		}
+    if(l.is('spike')){
+      go('game over', lvl, score, Game.state.play.coins);
+      music.stop();
+    }
 	})
   player.onGround((l) => {
 		if (l.is("boss")) {
@@ -1201,7 +1447,7 @@ scene('play', (lvl, s, c) => {
       player.move(player.kbk*DISPLACEMENT, 0);
     }
 
-    if(player.pos.y > 550){
+    if(player.pos.y > 650){
       music.stop();
       go('game over', lvl, score, Game.state.play.coins);
     }
@@ -1242,15 +1488,15 @@ scene('play', (lvl, s, c) => {
 =                   GAME OVER SCREEN                                                                                                    =
 =======================================================================================================================================*/
 scene('game over', (lvl, SCORE, c) => {
-  const music = play('game-over', {volume: 0.3,});
+  const music = play('game-over', {volume: 0.15,});
   if(Game.state.play.score > Game.state.play.highscore){
     Game.state.play.highscore = Game.state.play.score;
     add([
       text('NEW HIGHSCORE!!', {
-        size: 12, 
+        size: 12,
         transform: (idx, ch) => ({
           pos: vec2(0, wave(3, -3, time() * 2 + idx * 0.5)),
-          color: hsl2rgb((time() * 0.2 + idx * 0.1) % 2, 0.7, 0.6),
+          color: hsl2rgb(wave(0, 1, time()), 0.6, 0.6)
         })
       }),
       pos(width()/2 - 450, height()/4 + 160),
@@ -1277,7 +1523,7 @@ scene('game over', (lvl, SCORE, c) => {
   ])
   add([
     text('CLICK OR PRESS ENTER TO RESTART', {
-      size: 15, 
+      size: 15,
       // width: width(),
       transform: (idx, ch) => ({
         pos: vec2(0, wave(-3, 3, time() * 5 * 0.5)),
@@ -1291,7 +1537,7 @@ scene('game over', (lvl, SCORE, c) => {
   ])
   add([
     text('PRESS BACKSPACE TO GO BACK TO THE MAIN SCREEN', {
-      size: 15, 
+      size: 15,
       // width: width(),
       transform: (idx, ch) => ({
         pos: vec2(0, wave(-3, 3, time() * 5 * 0.5)),
@@ -1328,14 +1574,14 @@ scene('outro', () => {
 			  pos: vec2(0, wave(-3, 3, time() * 3 * 0.5)),
 		  })
     }),
-    // color(255, 221, 71),
+    color(255, 255, 255),
     origin('center'),
     pos(width()/2, height()/2),
     z(10),
   ])
   add([
     text('CLICK OR PRESS ENTER TO GO BACK TO THE MAIN SCREEN', {
-      size: 15, 
+      size: 15,
       // width: width(),
       transform: (idx, ch) => ({
         pos: vec2(0, wave(-3, 3, time() * 5 * 0.5)),

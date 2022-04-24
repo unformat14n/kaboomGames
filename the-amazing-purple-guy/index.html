@@ -172,6 +172,37 @@
       sliceX: 3,
       sliceY: 1,
     })
+    loadSprite('spike-slime', 'assets/sprites/spike-slime.png', {
+      sliceX: 2,
+      sliceY: 1,
+      anims:
+      {
+        idle: {from: 0, to: 1, loop: true, speed: 3},
+      }
+    })
+    loadSprite('skull-v', 'assets/sprites/blue-skull.png', {
+      sliceX: 2,
+      sliceY: 1,
+      anims:
+      {
+        idle: {from: 0, to: 1, loop: true, speed: 3},
+      }
+    })
+    loadSprite('hats', 'assets/sprites/hats.png', {
+      sliceX: 4,
+      sliceY: 2,
+      anims:
+      {
+        hatIdle: 0,
+        hatAction: 1,
+        hatCrouch: 2,
+        hatHurt: 3,
+        flowerIdle: 4,
+        flowerAction: 5,
+        flowerCrouch: 6,
+        flowerHurt: 7,
+      }
+    })
 
       // <!--=====================================
       // =                Sounds                =
@@ -182,6 +213,7 @@
       loadSound('level3', 'assets/sounds/flowers-in-the-ceil.mp3');
       loadSound('level4', 'assets/sounds/where-filthiness-grows.mp3');
       loadSound('main', 'assets/sounds/here-awaits-the-monster.mp3');
+      loadSound('level5', 'assets/sounds/cursed.mp3');
       loadSound('game-over', 'assets/sounds/the-end.mp3');
       loadSound('jump', 'assets/sounds/jump2.wav');
       loadSound('hurt', 'assets/sounds/hurt2.wav');
@@ -189,7 +221,9 @@
       loadSound('e-death', 'assets/sounds/enemy-death.wav');
       loadSound('h-jump', 'assets/sounds/hyper-jump.wav');
       loadSound('s-appear', 'assets/sounds/skull-appears.wav');
-
+      loadSound('blocked', 'assets/sounds/blocked.wav');
+      loadSound('sold', 'assets/sounds/sold.wav');
+      loadSound('use', 'assets/sounds/use.wav');
 
       loadFont('amazing-font', 'assets/sprites/font.png', 8, 8.01, {chars: "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890:'.,!", wrap: 'clampToEdge'})
   </script>
