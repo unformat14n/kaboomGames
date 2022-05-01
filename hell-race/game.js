@@ -20,6 +20,10 @@ loader();
 const Game = {
   state: {
     over: false,
+  },
+  info: {
+    acceleration: 40,
+    increaseAcceleration: 10,
   }
 }
 const LAYERS = ['bg', 'obs', 'player', 'ui']
@@ -60,7 +64,7 @@ scene('main', () => {
 scene('play', () => {
   Game.state.over = false;
   gravity(1000)
-  layers(LAYERS)
+  layers(LAYERS);
 
   const player = add([
     sprite('player', {anim: 'run'}),
@@ -70,6 +74,13 @@ scene('play', () => {
     body(),
     layer('player'),
     origin('center'),
+    {
+      jumping: false,
+      fall: false,
+      slide: false,
+      hit: false,
+    },
+    "player"
   ])
 
   add([
@@ -82,14 +93,30 @@ scene('play', () => {
   ])
 
   onKeyPress('space', () => {
-    if(player.grounded()){
+    if(player.grounded() && !player.slide && !player.hit){
       player.jump(500);
+      if(player.curAnim() !== 'jump'){
+        player.play('jump');
+      }
+      wait(0.4, () => player.play('fall'))
+    }
+  })
+  onKeyPress('down', () => {
+    if(player.grounded() && !player.slide && !player.hit) {
+      player.slide = true;
+      player.area.height = 2;
+      if(player.curAnim() !== 'slide'){
+        player.play('slide');
+      }
+      wait(0.8, () => player.slide = false)
+      wait(0.8, () => player.area.height = 8);
     }
   })
 
-  player.onCollide('tree', (t) => {
+  player.onCollide('obs', (t) => {
     Game.state.over = true;
-    if(player.curAnim() != 'hit'){
+    player.hit = true;
+    if(player.curAnim() !== 'hit'){
       player.play('hit')
     }
   })
@@ -110,9 +137,17 @@ scene('play', () => {
     })
   })
 
-  spawnObs();
+  player.onUpdate(() => {
+    if(player.grounded()){
+      if(player.curAnim() !== "run" && !player.hit && !player.slide){
+        player.play('run')
+      }
+    }
+  })
 
-  every("tree", (t) => {
+  spawnObs(Game.info.acceleration, Game.info.increaseAcceleration);
+
+  every("obs", (t) => {
     t.onUpdate(() => {
       if(Game.state.over){
         t.unuse('move');
@@ -124,7 +159,7 @@ scene('play', () => {
   })
 
   onUpdate(() => {
-    every("tree", (t) => {
+    every("obs", (t) => {
       if(Game.state.over){
         t.unuse('move');
       }
