@@ -427,7 +427,7 @@ function spawnAccesory(f, n, state, c, p){
     scale(10),
     fixed(),
     layer('ui'),
-    origin(vec2(0.3, -0.7)),
+    origin(vec2(0.3, -0.2 )),
   ])
   add([
     text(`${c}`, {size: 20}),
@@ -450,8 +450,10 @@ function accesoryLife(acc, obj){
   ]);
   if(acc.id == 'b-hat'){
     s = 'hat';
-  }else {
+  }else if(acc.id == 'flower'){
     s = 'flower';
+  }else {
+    s = "mostache";
   }
   a.onUpdate(() => {
     if(obj.dir > 0){
@@ -493,10 +495,10 @@ const Game = {
         '                                                                                                                                                     ',
         '                                                                                                                                                     ',
         '                                                                                                                                                     ',
-        '                            $                                                                                                                       ⎌',
-        '                                 $$$                                                                                                                =',
-        '                                  s                                                                                                               =  ',
-        '              $             =  =======  ===                            $       $      $$$$  b                    =   $                 b       =     ',
+        '                            $    $$$                                                                                                                ⎌',
+        '                                                                                                                                                    =',
+        '                                  s                                    $       $                                                                  =  ',
+        '              $             =  =======  ===                                           $$$$  b                    =   $                 b       =     ',
         '                            =             =     s                          g                           ==  =  =                      s      =        ',
         ' ^     s     ====       z   =             ============                ===========  ==========     ⇿                        ⇿     =========           ',
         ' ==========        ==========             ============  =  =   =   =  ===========                                    =                               ',
@@ -508,7 +510,7 @@ const Game = {
         '                  -------  -                 -                 ---    ^ g ^                                                    -      -              ',
         '                              -              -                    ------------                                        b        -        -            ',
         '                        $   $    -    $$$$$  -                                         b             $$$                       -          -          ',
-        '       $    $    $                           -                                                                 ^^  g   ^^   -  -             -       ',
+        '            $ $$ $                           -                                                                 ^^  g   ^^   -  -             -       ',
         '                       ^  ^         -------  -                                                     ^  s  ^   -------------                      -    ',
         '     ^^  ^^     s   -----------------------  -                                ←                   ---------                   -     ^          -     ',
         '-------------------------------------------  -                                       S         -                               --  ---     ← --      ',
@@ -516,8 +518,8 @@ const Game = {
       ],
       [
         '                                                                         ^                                                                           ',
-        '                                                                        ___  _   _                       S          ^^ S ^^                          ',
-        '                                                                     $$$             _        ⎌     s    ^^   s    _________ ^^   ^^        $        ',
+        '                                                                     $$$___  _   _                       S          ^^ S ^^                          ',
+        '                                                                                     _        ⎌     s    ^^   s    _________ ^^   ^^        $        ',
         '                                                                    s    s            _       _____________________         _________                ',
         '                                                                  __________  ____     _                                             _               ',
         '                                                                                        _                                             _              ',
@@ -557,7 +559,7 @@ const Game = {
         '                                                                                                                            g           =  ==========   s                      ',
         '                                                                                                                              ↑         =            ========                  ',
         '                                                                                                                              ===       =                                   k  ',
-        '                                ↑                                                                                                g      =                      ================',
+        '                                ↑                                                                                               g       =                      ================',
         '                    =   =   =   =               $$$$$$$                    b      $$    b                                          ↑    =                                      ',
         '                      v       v                                                                                                    ==   =                                      ',
         '                                                                       ^    *    s    *     ^                                           =                                      ',
@@ -659,7 +661,7 @@ const Game = {
       ],
       "g": () => [
         sprite('ghost', {anim: 'idle'}),
-        area({width: 8, height: 8}),
+        area({width: 8, height: 8, scale: 0.8}),
         origin('center'),
         solid(),
         layer('objects'),
@@ -811,7 +813,7 @@ const Game = {
       bossFight: false,
       highscore: 0,
       score: 0,
-      coins: 100,
+      coins: 0,
       bossDefeated: false,
       slimes: 0,
     },
@@ -824,13 +826,14 @@ const Game = {
   },
   accesories: {
     "b-hat": {frame: 0, id: "b-hat", state: {sold: false}, cost: 25},
-    "flower": {frame: 4, id: "flower", state: {sold: false}, cost: 25},
-    number: 2,
+    "flower": {frame: 5, id: "flower", state: {sold: false}, cost: 25},
+    "mostache": {frame: 11, id: "mostache", state: {sold: false}, cost: 30},
+    number: 3,
     inUse: null,
   }
 }
 const ACHMNTS_NAMES = ["Like Scrooge McDuck", "Slime Hunter", "Score Master"];
-const ACCESORIES_NAMES = ["b-hat", "flower"];
+const ACCESORIES_NAMES = ["b-hat", "flower", "mostache"];
 const SPEED = 185;
 const JUMP_FORCE = 550;
 const DISPLACEMENT = 180;
@@ -1001,7 +1004,7 @@ scene('xtra', () => {
       }),
     }),
     opacity(1),
-    pos(width() - 400, height()/1.2),
+    pos(width() - 600, height()/1.2),
     origin('center'),
     // color(255, 221, 71),
   ])
@@ -1056,6 +1059,30 @@ scene('shop', () => {
     coinsLabel.text = Game.state.play.coins;
   })
 
+  const use = add([
+    text('IN USE', {size: 30}),
+    pos(0,0),
+    origin('center'),
+    layer('ui'),
+    z(100),
+    color(51, 255, 118),
+  ])
+
+  add([
+    text('PRESS ENTER TO GO BACK TO THE MAIN SCREEN', {
+      size: 15,
+      // width: width(),
+      transform: (idx, ch) => ({
+        pos: vec2(0, wave(-3, 3, time() * 5 * 0.5)),
+        opacity: wave(1, 0, time() * 8 * 0.3),
+      }),
+    }),
+    opacity(1),
+    pos(width() - 400, height()/1.2),
+    origin('center'),
+    // color(255, 221, 71),
+  ])
+
   every('article', (a) => {
     a.onClick(() => {
       if(!Game.accesories[a.name].state.sold){
@@ -1063,6 +1090,9 @@ scene('shop', () => {
           Game.state.play.coins -= a.cost
           Game.accesories[a.name].state.sold = true;
           play('sold', {volume: 0.35})
+          Game.accesories.inUse = Game.accesories[a.name];
+          play('use', {volume: 0.35})
+          use.pos = a.pos;
         }else {
           play('blocked', {volume: 0.35})
         }
@@ -1070,6 +1100,7 @@ scene('shop', () => {
       else{
         Game.accesories.inUse = Game.accesories[a.name];
         play('use', {volume: 0.35})
+        use.pos = a.pos;
       }
     })
     onKeyPress('enter', () => {
@@ -1355,7 +1386,7 @@ scene('play', (lvl, s, c) => {
   player.onCollide('box', (b, col) => {
     if(col.isTop()){
       if(!b.used){
-        createFX(vec2(b.pos.x, b.pos.y - 50), 'coin');
+        createFX(vec2(b.pos.x + 20, b.pos.y - 50), 'coin');
         play('coin', {volume: 0.3})
         b.used = true;
         score+=10;

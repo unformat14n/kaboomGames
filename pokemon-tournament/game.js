@@ -232,12 +232,13 @@ scene('battle', (pPokemon, ePokemon,) => {
   onUpdate(() => {
     // debug.log(Game.battle.atkAnim + ', ' + Game.battle.playerTurn);
     if(!Game.battle.playerTurn && !Game.battle.atkAnim){
-      if(foeatk == undefined && !Game.battle.atkAnim){
+      // if(foeatk == undefined && !Game.battle.atkAnim){
         foeatk = ePokemon.atks[Math.floor(Math.random()*ePokemon.atks.length)];
         createFX(foeatk.fx, 'foe', foeatk.dmg);
-      }
-      debug.log(foeatk.id);
+      // }
+      // debug.log(foeatk.id);
     }
+    debug.log(foeatk.id);
   })
 })
 

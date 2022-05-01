@@ -190,17 +190,21 @@
     })
     loadSprite('hats', 'assets/sprites/hats.png', {
       sliceX: 4,
-      sliceY: 2,
+      sliceY: 4,
       anims:
       {
         hatIdle: 0,
         hatAction: 1,
         hatCrouch: 2,
         hatHurt: 3,
-        flowerIdle: 4,
-        flowerAction: 5,
+        flowerIdle: {from: 4, to: 5, loop: true, speed: 1},
+        flowerAction: {from: 7, to: 8, loop: true, speed: 5},
         flowerCrouch: 6,
-        flowerHurt: 7,
+        flowerHurt: {from: 9, to: 10, speed: 4, pingpong: true,},
+        mostacheIdle: 11,
+        mostacheAction: 12,
+        mostacheCrouch: 13,
+        mostacheHurt: 14,
       }
     })
 
