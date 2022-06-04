@@ -8,15 +8,18 @@ kaboom({
 })
 loader();
 
-function showAnswer() {
+function showAnswer(language) {
   if(get('answer').length > 0){
     get('answer')[0].destroy();
   }
-  const ANSWERS = ['It is certain.', 'It is decidedly so.', 'Reply hazy, try again.', 'Don’t count on it.', 'Without a doubt.', 'Yes definitely.', 'Ask again later', 'My reply is no.', 'You may rely on it.', 'As I see it, yes.', 'Better not to tell you now.', 'My sources say no.', 'Most likely.', 'Outlook good.', 'Cannot predict now.', 'Outlook not so good.', 'Yes.', 'Sigs point to yes', 'Concentrate and ask again', 'Very doubtful.'];
+  const ANSWERS = {
+    english: ['It is certain.', 'It is decidedly so.', 'Reply hazy, try again.', 'Don’t count on it.', 'Without a doubt.', 'Yes definitely.', 'Ask again later', 'My reply is no.', 'You may rely on it.', 'As I see it, yes.', 'Better not to tell you now.', 'My sources say no.', 'Most likely.', 'Outlook good.', 'Cannot predict now.', 'Outlook not so good.', 'Yes.', 'Sigs point to yes', 'Concentrate and ask again', 'Very doubtful.'],
+    spanish: ['Es cierto.', 'Es decididamente asi.', 'Respuesta confusa, vuelve a intentarlo.', 'No cuentes con ello.', 'Sin lugar a dudas', 'Si, definitivamente', 'Vuelve a preguntar mas tarde.', 'Mi respuesta es no.', 'Como yo lo veo, si.', 'Puedes contar con ello.', 'Es mejor no decirte ahora.', 'Mis fuentes dicen que no.', 'Es lo mas probable.', 'Predicciones buenas.', 'Las predicciones no son muy buenas.', 'Si.', 'Los signos apuntan al si.', 'Concentrate y vuelve a preguntar.', 'Muy dudoso.'],
+  }
   const colors = [[255, 231, 255], [255, 231, 157], [170, 231, 157], [170, 144, 157], [162, 244, 255], [162, 145, 255], [255, 111, 181], [255, 24, 125], [255, 13, 60]]
-  let randAns = ANSWERS[randi(0, ANSWERS.length - 1)];
+  let randAns = choose(language == 'eng' ? ANSWERS.english : ANSWERS.spanish);
   let a = add([
-    text(`THE MAGIC EIGHT BALL SAYS: ${randAns.toUpperCase()}`, 
+    text(language == 'eng' ? `THE MAGIC EIGHT BALL SAYS: ${randAns.toUpperCase()}` : `LA BOLA MAGICA DICE: ${randAns.toUpperCase()}`, 
     {
       size: 30, 
       width: width() - 650,
@@ -57,8 +60,28 @@ function showAnswer() {
 }
 
 scene('main', () => {
-  add([
-    text('ASK THE MAGIC EIGHT BALL!', {
+  let language = 'eng';
+  const l = add([
+    text(language == 'eng' ? `LANGUAGE: ${language.toUpperCase()}` : `IDIOMA: ${language.toUpperCase()}`, {
+      size: 20,
+    }),
+    pos(width() - 100, height() - 30),
+    origin('botright'),
+    area(),
+  ])
+  l.onUpdate(() => {
+    l.text = `LANGUAGE: ${language.toUpperCase()}`;
+  })
+  l.onClick(() => {
+    if(language == 'eng'){
+      language = 'esp';
+    }else {
+      language = 'eng'
+    }
+  })
+
+  const h = add([
+    text(language == 'eng' ? 'ASK THE MAGIC EIGHT BALL!' : 'PREGUNTALE A LA BOLA OCHO MAGICA', {
       size: 40, 
       transform: (idx, ch) => ({
         pos: vec2(0, wave(-4, 4, time() * 1.5 + idx * 0.8)),
@@ -68,9 +91,12 @@ scene('main', () => {
     origin('center'),
     z(100),
   ])
+  h.onUpdate(() => {
+    h.text = language == 'eng' ? 'ASK THE MAGIC EIGHT BALL!' : 'PREGUNTALE A LA BOLA OCHO MAGICA';
+  })
 
   const input = add([
-    text('TYPE SOMETHING', {
+    text(language == 'eng' ? 'TYPE SOMETHING' : 'ESCRIBE ALGO', {
       size: 40, 
       width: width() - 50,
       transform: (idx, ch) => ({
@@ -114,9 +140,9 @@ scene('main', () => {
     // }
   })
   onKeyPress("enter", () => {
-    input.text = '...'
     shake(40);
-    showAnswer();
+    showAnswer(language);
+    wait(2.5, () => input.text = '...')
   })
 })
 
