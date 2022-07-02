@@ -1,6 +1,8 @@
 import kaboom from "https://unpkg.com/kaboom/dist/kaboom.mjs";
 import loader from "./loader.js";
 import patrol from "./patrol.js";
+import shoot from "./shoot.js";
+import eat from "./eat.js";
 
 kaboom({
   background: [0,0,0],
@@ -31,31 +33,67 @@ function fakeBody(){
 }
 
 const GAME = {
-  maps: {
-    1: [
-      "                                                                                                                                               ",
-      "                                                                                                                                               ",
-      "                                                                                                                                               ",
-      "                                                        =                                                                                      ",
-      "                                                     =     =                      ^    ^ ^                                                     ",
-      "                                                    ==                           ===  =====     k                                             d",
-      "                            ^^     ^   c       ^^ ====        =    ^^ ^^    ===            ==========                       c       ^    ======",
-      "                   k      ======  ===  =  =  =========           =========                                   b          ========  =====        ",
-      "========================                                                                             =================                         ",
-    ],
-    2: [
-      "                                                                                                                                               ",
-      "                                                                                                                                               ",
-      "                                                                                                                                               ",
-      "                                                                                                                                               ",
-      "                                                                                  ^    ^ ^                                                     ",
-      "                                                                                 ===  =====     k                                             d",
-      "                                   ^             ck     s    s    ^  k  ^   ===            ==========                       c       ^    ======",
-      "       ^^  ^^     k       ^^  ^^  ===        =========  =    =   =========                                   b          ========  =====        ",
-      "=======================  ========      ====                                                          =================                         ",
-    ]
+  levels: {
+    maps: {
+      1: [
+        "                                                                                                                                               ",
+        "                S                               2                                            2                                                 ",
+        "                                                                                                                                               ",
+        "                             1                          =         1                                              1                 2           ",
+        "        1                          2                 =     =                      ^    ^ ^                                                     ",
+        "                                                    ==                           ===  =====     k                                             d",
+        "                            ^^     ^   c       ^^ ====        =    ^^ ^^    ===            ==========                       c       ^    ======",
+        "                   k      ======  ===  =  =  =========           =========                                   b          ========  =====        ",
+        "========================                                                                             =================                         ",
+      ],
+      2: [
+        "                                                                                                                  2                            ",
+        "                                          1                     1       1                         2                            1               ",
+        "                                                                                          2                 1           =               2      ",
+        "          2      S                                                                                                     =                       ",
+        "                            2                            2                        ^      f                 b        f =    =               f d ",
+        "                                                                                 ===  =====     k    ==================     =       ===========",
+        "                                   ^             ck     s    s    ^  k  ^   ===            ==========                          s               ",
+        "       ^^  ^^     k       ^^  ^^  ===        =========  =    =   =========                                                   ===               ",
+        "=======================  ========      ====                                                                                                    ",
+      ],
+      3: [
+        "                                                                                         4                                 3                  ",
+        "                M                                              3                                                                   ^  ^   f    ",
+        "                              2                                                                         4                      =============   ",
+        "       3                                                               s      f                                       s      ==                ",
+        "                                                  3                    =   =  =      c                f  ^    k   ^ f =    ==           c    f ",
+        "                                                            =                    ===  =====          ==================             ===========",
+        "                   c               ^   =  =         f   s        ^^ s                        =  =  =                         d     =           ",
+        "    ^^  ^^  f   =======    ^^ ^^  ===        =========  =      ======                                                        === =             ",
+        "==============           ========                                                                                                              ",
+      ],
+      4: [
+        "                                   3                                                  4                                                        ",
+        "       4                                                        3                                        4                       4             ",
+        "                   m                                                                      3                    3                               ",
+        "         f                                      ==                      b                                                   c                  ",
+        "       ====                    ==           =  ===                 =====                                             f   =======         3     ",
+        "      ==                      ===          ==  ===              f                             f  =             ========                        ",
+        "     ===                     =====  ^ ^   ===  ===      ======  =               c    ^ ^  =====  =         ==                                  ",
+        "    ====       s      k     ======  = =  ====  ===                              f    = =         =     k                             b        d",
+        "================  ===========================  ======================     =====================  =============                   ========  =  =",
+      ]
+    },
+    music: {
+      1: 'lvl1',
+      2: 'lvl2',
+      3: 'lvl3',
+      4: 'lvl4',
+    },
+    bg: {
+      1: [51, 182, 255],
+      2: [128, 144, 255],
+      3: [25, 51, 184],
+      4: [55, 65, 109],
+    }
   },
-  opts: {
+  lvl_opts: {
     width: 45,
     height: 45,
     "=": () => [
@@ -63,6 +101,56 @@ const GAME = {
       scale(2),
       area(),
       solid(),
+      z(5),
+    ],
+    "1": () => [
+      sprite('c1'),
+      scale(randi(2, 8)),
+      color(159, 221, 255),
+      move(LEFT, 10),
+      z(1),
+    ],
+    "2": () => [
+      sprite('c2'),
+      scale(randi(2, 8)),
+      color(159, 221, 255),
+      move(LEFT, 15),
+      z(1),
+    ],
+    "3": () => [
+      sprite('c1'),
+      scale(randi(2,8)),
+      color(117, 128, 169),
+      move(LEFT, 10),
+      z(1),
+    ],
+    "4": () => [
+      sprite('c2'),
+      scale(randi(2, 8)),
+      color(117, 128, 169),
+      move(LEFT, 15),
+      z(1),
+    ],
+    "S": () => [
+      sprite('sun'),
+      scale(3),
+      fixed(),
+      opacity(0.7),
+      z(1),
+    ],
+    "m": () => [
+      sprite('m1'),
+      scale(3),
+      fixed(),
+      opacity(0.7),
+      z(1),
+    ],
+    "M": () => [
+      sprite('m2'),
+      scale(3),
+      fixed(),
+      opacity(0.7),
+      z(1),
     ],
     "^": () => [
       sprite('spikes'),
@@ -70,6 +158,7 @@ const GAME = {
       area({width: 20, height: 10, offset: vec2(5, 30)}),
       solid(),
       "hazard",
+      z(5),
     ],
     "d": () => [
       sprite('door'),
@@ -77,6 +166,7 @@ const GAME = {
       area(),
       solid(),
       "door",
+      z(5),
     ],
     "k": () => [
       sprite('knife', {anim: 'walking'}),
@@ -87,7 +177,8 @@ const GAME = {
       fakeBody(),
       patrol(120, 100),
       origin('center'),
-      'foo'
+      'foo',
+      z(5),
     ],
     "c": () => [
       sprite('chef', {anim: 'idle'}),
@@ -95,7 +186,8 @@ const GAME = {
       area({width: 20, height: 20}),
       patrol(120, 300),
       origin('center'),
-      'foo'
+      'foo',
+      z(5),
     ],
     "b": () => [
       sprite('bean', {anim: 'idle'}),
@@ -103,7 +195,8 @@ const GAME = {
       area({width: 20, height: 20}),
       patrol(300, 300),
       origin('center'),
-      'foo'
+      'foo',
+      z(5),
     ],
     "s": () => [
       sprite('spring', {anim: 'idle'}),
@@ -112,18 +205,51 @@ const GAME = {
       solid(),
       origin('topleft'),
       'spring',
-    ]
+      z(5),
+    ],
+    "f": () => [
+      sprite('fire_thrower'),
+      scale(2),
+      area(),
+      solid(),
+      shoot(3),
+      'machine',
+      z(5),
+    ],
+    // "e": () => [
+    //   sprite('eater'),
+    //   scale(2),
+    //   area(),
+    //   solid(),
+    //   eat(2),
+    //   'eater',
+    //   {
+    //     danger: false,
+    //     idle: true,
+    //   }
+    // ],
   }
 }
 
 scene('play', (lvl) => {
+
+  const bg = add([
+    rect(width(), height()),
+    pos(width()/2, height()/2),
+    origin('center'),
+    color(GAME.levels.bg[`${lvl}`][0],GAME.levels.bg[`${lvl}`][1], GAME.levels.bg[`${lvl}`][2]),
+    fixed(),
+  ])
+
+  const music = play(GAME.levels.music["" + lvl], {loop: true, volume: 0.07});
+
   const player = add([
     sprite('red-chili',),
     scale(2),
     area({width: 10, height: 18}),
     body(),
     health(3),
-    pos(2800  , height()/2),
+    pos(100, height()/2),
     origin('center'),
     z(10),
     {
@@ -140,7 +266,19 @@ scene('play', (lvl) => {
     }
   ]);
 
-  const level = addLevel(GAME.maps[`${lvl}`], GAME.opts)
+  const level = addLevel(GAME.levels.maps[`${lvl}`], GAME.lvl_opts);
+
+  for(let i=0; i<player.hp(); i++){
+    add([
+      sprite('life'),
+      scale(3),
+      pos(20 + 15*i, 30),
+      z(20),
+      origin('center'),
+      'hp',
+      fixed(),
+    ])
+  }
 
   let t = 0;
   player.onUpdate(() => {
@@ -160,6 +298,7 @@ scene('play', (lvl) => {
       camPos(player.pos.x, 210)
     }
     if(player.pos.y > 600){
+      music.stop();
       go('game_over', lvl)
     }
 
@@ -169,6 +308,10 @@ scene('play', (lvl) => {
         player.hidden = !player.hidden;
         wait(0.00000001, () => t=0)
       }
+    }
+
+    if(player.hp() < get('hp').length){
+      get('hp')[get('hp').length - 1].destroy();
     }
   })
 
@@ -193,6 +336,7 @@ scene('play', (lvl) => {
   })
   onKeyPress('space', () => {
     if(player.grounded() && !player.death){
+      play('jump', {volume: 0.3});
       player.jump(player.jump_force);
     }
   })
@@ -200,6 +344,7 @@ scene('play', (lvl) => {
   player.onCollide('foo', (f) => {
     if(!player.death && !player.invincibility && !player.hit){
       player.hit = true;
+      play('hurt', {volume: 0.3});
       player.invincibility = true;
       player.hurt(1);
       player.knockback = f.pos.x > player.pos.x ? -1 : 1;
@@ -208,26 +353,44 @@ scene('play', (lvl) => {
   player.onCollide('hazard', (h) => {
     if(!player.death && !player.invincibility && !player.hit){
       player.hit = true;
+      play('hurt', {volume: 0.3});
       player.invincibility = true;
       player.hurt(1);
       player.knockback = player.dir > 0 ? -1 : 1;
     }
   })
   player.onCollide('door', (d) => {
-    go('play', lvl+1)
+    if(lvl == 4){
+      music.stop();
+      go("win");
+    }else {
+      music.stop();
+      go('play', lvl+1);
+    }
   })
+  player.onCollide('fireball', (d) => {
+    if(!player.death && !player.invincibility && !player.hit){
+      player.hit = true;
+      d.destroyed = true;
+      play('hurt', {volume: 0.3});
+      player.invincibility = true;
+      player.hurt(1);
+      player.knockback = player.dir > 0 ? -1 : 1;
+    }
+  });
 
   player.onGround((l) => {
     if(l.is('spring')){
       l.play('used');
       wait(0.2, () => l.play('idle'));
       player.jump(player.jump_force*1.5)
+      play('super_jump', {volume: 0.3});
     }
   })
 
   player.onDeath(() => {
     player.death = true;
-    wait(0.4, () => go('game_over', lvl));
+    wait(0.4, () => {music.stop(); go('game_over', lvl)});
   })
   
   const handleAnims = () => {
@@ -260,6 +423,32 @@ scene('play', (lvl) => {
   }
 })
 
+scene('win', () => {
+  const s = add([
+    sprite('won'),
+    scale(6),
+    pos(width()/2, height()/2),
+    origin('center'),
+  ])
+  const txt = add([
+    text("YOU'VE HELPED CHILI TO ESCAPE FROM THE CHILI EATERS! STAY TUNED FOR MORE LEVELS AND GAMES!", 
+    {
+      size: 20,
+      width: width() - 50,
+      font: 'sinko', 
+      transform: (idx, ch) => ({
+        // color: hsl2rgb((time() * 0.2 + idx * 0.1) % 1, 0.7, 0.8),
+        pos: vec2(0, wave(-4, 4, time() * 4 * 0.5)),
+        scale: wave(1, 1.1, time() * 3 + idx),
+        // angle: wave(-9, 9, time() * 3 + idx),
+      }),
+    }),
+    color(50, 250, 50),
+    pos(width()/2, height()/8),
+    origin("center")
+  ])
+})
+
 scene('game_over', (lvl) => {
   const m = play('go', {volume: 0.1});
   const s = add([
@@ -285,11 +474,59 @@ scene('game_over', (lvl) => {
     origin("center")
   ])
 
-  onKeyPress(() => {
+  onKeyPress(["enter", "space"],() => {
     m.stop();
     go('play', lvl)
   })
 })
 
-go('play', 2);
+scene('main', () => {
+  const music = play('main', {volume: 0.2, loop: true})
+  const s = add([
+    sprite('main'),
+    scale(6),
+    pos(width()/2, height()/2),
+    origin('center'),
+  ])
+  const txt = add([
+    text('CHILI ADVENTURES: ESCAPE FROM THE CHILI EATERS!', 
+    {
+      size: 40,
+      font: 'sinko',
+      width: width() - 20,
+      transform: (idx, ch) => ({
+        // color: hsl2rgb((time() * 0.2 + idx * 0.1) % 1, 0.7, 0.8),
+        pos: vec2(0, wave(-4, 4, time() * 4  * 0.5)),
+        // scale: wave(1, 1.1, time() * 3 + idx),
+        // angle: wave(-9, 9, time() * 3 + idx),
+      }),
+    }),
+    color(230, 50, 50),
+    pos(width()/2, height()/8),
+    origin("center")
+  ])
+  add([
+    text('PRESS ENTER OR SPACE TO PLAY', 
+    {
+      size: 20,
+      font: 'sinko',
+      width: width() - 20,
+      transform: (idx, ch) => ({
+        // color: hsl2rgb((time() * 0.2 + idx * 0.1) % 1, 0.7, 0.8),
+        pos: vec2(0, wave(-4, 4, time() * 1.5)),
+        // scale: wave(1, 1.1, time() * 3 + idx),
+        // angle: wave(-9, 9, time() * 3 + idx),
+      }),
+    }),
+    color(220, 220, 255),
+    pos(width()/2, height()/1.1),
+    origin("center")
+  ])
+  onKeyPress(['enter', 'space'], () => {
+    music.stop();
+    go('play', 1)
+  })
+})
+
+go('main');
 focus()
