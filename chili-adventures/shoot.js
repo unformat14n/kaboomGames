@@ -21,6 +21,7 @@ function shoot(interval){
         scale(2),
         area({scale: 0.7}),
         origin('center'),
+        layer('fx'),
         "fireball",
         {
           destroyed: false,

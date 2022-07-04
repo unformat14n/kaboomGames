@@ -1,5 +1,27 @@
 function loader () {
-  loadSprite('red-chili', "./sprites/red-chili.png", {
+  loadSprite('red_chili', "./sprites/red-chili.png", {
+    sliceX: Math.floor(4),
+    sliceY: Math.floor(4),
+    anims: {
+      idle: {from: 3, to: 4, loop: true, speed: 2 },
+      run: {from: 5, to: 12, loop: true, speed: 13},
+      fall: 1,
+      hurt: 2,
+      death: 0,
+    }
+  })
+  loadSprite('mr_chili', "./sprites/mr_chili.png", {
+    sliceX: Math.floor(4),
+    sliceY: Math.floor(4),
+    anims: {
+      idle: {from: 3, to: 4, loop: true, speed: 2 },
+      run: {from: 5, to: 12, loop: true, speed: 13},
+      fall: 1,
+      hurt: 2,
+      death: 0,
+    }
+  })
+  loadSprite('g_chili', "./sprites/green-chili.png", {
     sliceX: Math.floor(4),
     sliceY: Math.floor(4),
     anims: {
@@ -55,6 +77,10 @@ function loader () {
       hide: {from: 5, to: 6}
     }
   })
+  loadSprite('icon', "./sprites/icons.png", {
+    sliceX: Math.floor(3),
+    sliceY: Math.floor(1),
+  })
   loadSprite('tile1', "./sprites/tile1.png")
   loadSprite('c1', "./sprites/cloud1.png")
   loadSprite('c2', "./sprites/cloud2.png")
@@ -72,6 +98,7 @@ function loader () {
 
   loadSound('go', './sounds/game_over.wav')
   loadSound('main', './sounds/poor_chili.wav')
+  loadSound('choose', './sounds/time_for_a_spicy_food.wav')
   loadSound('lvl1', './sounds/mad-rush.wav')
   loadSound('lvl3', './sounds/vintage-dash.wav')
   loadSound('lvl2', './sounds/hot_pepper.wav')

@@ -2,7 +2,8 @@ import kaboom from "https://unpkg.com/kaboom/dist/kaboom.mjs";
 import loader from "./loader.js";
 import patrol from "./patrol.js";
 import shoot from "./shoot.js";
-import eat from "./eat.js";
+import spawnClouds from "./spawnClouds.js";
+// import eat from "./eat.js";
 
 kaboom({
   background: [0,0,0],
@@ -37,43 +38,43 @@ const GAME = {
     maps: {
       1: [
         "                                                                                                                                               ",
-        "                S                               2                                            2                                                 ",
+        "                S                                                                                                                              ",
         "                                                                                                                                               ",
-        "                             1                          =         1                                              1                 2           ",
-        "        1                          2                 =     =                      ^    ^ ^                                                     ",
+        "                                                        =                                                                                      ",
+        "                                                     =     =                      ^    ^ ^                                                     ",
         "                                                    ==                           ===  =====     k                                             d",
         "                            ^^     ^   c       ^^ ====        =    ^^ ^^    ===            ==========                       c       ^    ======",
         "                   k      ======  ===  =  =  =========           =========                                   b          ========  =====        ",
         "========================                                                                             =================                         ",
       ],
       2: [
-        "                                                                                                                  2                            ",
-        "                                          1                     1       1                         2                            1               ",
-        "                                                                                          2                 1           =               2      ",
-        "          2      S                                                                                                     =                       ",
-        "                            2                            2                        ^      f                 b        f =    =               f d ",
+        "                                                                                                                                               ",
+        "                                                                                                                                               ",
+        "                                                                                                                        =                      ",
+        "                 S                                                                                                     =                       ",
+        "                                                                                  ^      f                 b        f =    =               f d ",
         "                                                                                 ===  =====     k    ==================     =       ===========",
         "                                   ^             ck     s    s    ^  k  ^   ===            ==========                          s               ",
         "       ^^  ^^     k       ^^  ^^  ===        =========  =    =   =========                                                   ===               ",
         "=======================  ========      ====                                                                                                    ",
       ],
       3: [
-        "                                                                                         4                                 3                  ",
-        "                M                                              3                                                                   ^  ^   f    ",
-        "                              2                                                                         4                      =============   ",
-        "       3                                                               s      f                                       s      ==                ",
-        "                                                  3                    =   =  =      c                f  ^    k   ^ f =    ==           c    f ",
+        "                                                                                                                                              ",
+        "                M                                                                                                                  ^  ^   f    ",
+        "                                                                                                                               =============   ",
+        "                                                                       s      f                                       s      ==                ",
+        "                                                                       =   =  =      c                f  ^    k   ^ f =    ==           c    f ",
         "                                                            =                    ===  =====          ==================             ===========",
         "                   c               ^   =  =         f   s        ^^ s                        =  =  =                         d     =           ",
         "    ^^  ^^  f   =======    ^^ ^^  ===        =========  =      ======                                                        === =             ",
         "==============           ========                                                                                                              ",
       ],
       4: [
-        "                                   3                                                  4                                                        ",
-        "       4                                                        3                                        4                       4             ",
-        "                   m                                                                      3                    3                               ",
+        "                                                                                                                                               ",
+        "                                                                                                                                               ",
+        "                   m                                                                                                                           ",
         "         f                                      ==                      b                                                   c                  ",
-        "       ====                    ==           =  ===                 =====                                             f   =======         3     ",
+        "       ====                    ==           =  ===                 =====                                             f   =======               ",
         "      ==                      ===          ==  ===              f                             f  =             ========                        ",
         "     ===                     =====  ^ ^   ===  ===      ======  =               c    ^ ^  =====  =         ==                                  ",
         "    ====       s      k     ======  = =  ====  ===                              f    = =         =     k                             b        d",
@@ -93,6 +94,8 @@ const GAME = {
       4: [55, 65, 109],
     }
   },
+  chars: ['red_chili', 'g_chili', 'mr_chili'],
+  layers: ['bg', 'enviro', 'game', 'fx', 'ui'],
   lvl_opts: {
     width: 45,
     height: 45,
@@ -101,56 +104,32 @@ const GAME = {
       scale(2),
       area(),
       solid(),
+      layer('enviro'),
       z(5),
-    ],
-    "1": () => [
-      sprite('c1'),
-      scale(randi(2, 8)),
-      color(159, 221, 255),
-      move(LEFT, 10),
-      z(1),
-    ],
-    "2": () => [
-      sprite('c2'),
-      scale(randi(2, 8)),
-      color(159, 221, 255),
-      move(LEFT, 15),
-      z(1),
-    ],
-    "3": () => [
-      sprite('c1'),
-      scale(randi(2,8)),
-      color(117, 128, 169),
-      move(LEFT, 10),
-      z(1),
-    ],
-    "4": () => [
-      sprite('c2'),
-      scale(randi(2, 8)),
-      color(117, 128, 169),
-      move(LEFT, 15),
-      z(1),
     ],
     "S": () => [
       sprite('sun'),
       scale(3),
       fixed(),
       opacity(0.7),
-      z(1),
+      z(3),
+      layer('bg'),
     ],
     "m": () => [
       sprite('m1'),
       scale(3),
       fixed(),
       opacity(0.7),
-      z(1),
+      z(3),
+      layer('bg'),
     ],
     "M": () => [
       sprite('m2'),
       scale(3),
       fixed(),
       opacity(0.7),
-      z(1),
+      z(3),
+      layer('bg'),
     ],
     "^": () => [
       sprite('spikes'),
@@ -159,6 +138,7 @@ const GAME = {
       solid(),
       "hazard",
       z(5),
+      layer('enviro'),
     ],
     "d": () => [
       sprite('door'),
@@ -167,6 +147,7 @@ const GAME = {
       solid(),
       "door",
       z(5),
+      layer('enviro'),
     ],
     "k": () => [
       sprite('knife', {anim: 'walking'}),
@@ -179,6 +160,7 @@ const GAME = {
       origin('center'),
       'foo',
       z(5),
+      layer('enviro'),
     ],
     "c": () => [
       sprite('chef', {anim: 'idle'}),
@@ -188,6 +170,7 @@ const GAME = {
       origin('center'),
       'foo',
       z(5),
+      layer('enviro'),
     ],
     "b": () => [
       sprite('bean', {anim: 'idle'}),
@@ -197,6 +180,7 @@ const GAME = {
       origin('center'),
       'foo',
       z(5),
+      layer('enviro'),
     ],
     "s": () => [
       sprite('spring', {anim: 'idle'}),
@@ -206,6 +190,7 @@ const GAME = {
       origin('topleft'),
       'spring',
       z(5),
+      layer('enviro'),
     ],
     "f": () => [
       sprite('fire_thrower'),
@@ -215,6 +200,7 @@ const GAME = {
       shoot(3),
       'machine',
       z(5),
+      layer('enviro'),
     ],
     // "e": () => [
     //   sprite('eater'),
@@ -231,7 +217,16 @@ const GAME = {
   }
 }
 
-scene('play', (lvl) => {
+scene('play', (lvl, chili) => {
+  layers(GAME.layers);
+
+  spawnClouds(GAME.levels.bg[lvl]);
+
+  every('cloud', (c) => {
+    if(c.pos.x < 2){
+      c.destroy();
+    }
+  })
 
   const bg = add([
     rect(width(), height()),
@@ -239,18 +234,20 @@ scene('play', (lvl) => {
     origin('center'),
     color(GAME.levels.bg[`${lvl}`][0],GAME.levels.bg[`${lvl}`][1], GAME.levels.bg[`${lvl}`][2]),
     fixed(),
+    layer('bg'),
   ])
 
   const music = play(GAME.levels.music["" + lvl], {loop: true, volume: 0.07});
 
   const player = add([
-    sprite('red-chili',),
+    sprite(GAME.chars[chili]),
     scale(2),
     area({width: 10, height: 18}),
     body(),
     health(3),
     pos(100, height()/2),
     origin('center'),
+    layer('game'),
     z(10),
     {
       jump_force: 580,
@@ -275,6 +272,7 @@ scene('play', (lvl) => {
       pos(20 + 15*i, 30),
       z(20),
       origin('center'),
+      layer('ui'),
       'hp',
       fixed(),
     ])
@@ -299,7 +297,7 @@ scene('play', (lvl) => {
     }
     if(player.pos.y > 600){
       music.stop();
-      go('game_over', lvl)
+      go('game_over', lvl, chili)
     }
 
     if(player.invincibility && !player.death) {
@@ -365,7 +363,7 @@ scene('play', (lvl) => {
       go("win");
     }else {
       music.stop();
-      go('play', lvl+1);
+      go('play', lvl+1, chili);
     }
   })
   player.onCollide('fireball', (d) => {
@@ -390,7 +388,7 @@ scene('play', (lvl) => {
 
   player.onDeath(() => {
     player.death = true;
-    wait(0.4, () => {music.stop(); go('game_over', lvl)});
+    wait(0.4, () => {music.stop(); go('game_over', lvl, chili)});
   })
   
   const handleAnims = () => {
@@ -449,7 +447,7 @@ scene('win', () => {
   ])
 })
 
-scene('game_over', (lvl) => {
+scene('game_over', (lvl, chili) => {
   const m = play('go', {volume: 0.1});
   const s = add([
     sprite('go'),
@@ -473,10 +471,36 @@ scene('game_over', (lvl) => {
     pos(width()/2, height()/8),
     origin("center")
   ])
-
-  onKeyPress(["enter", "space"],() => {
+  add([
+    text('PRESS ENTER OR SPACE TO PLAY AGAIN', 
+    {
+      size: 10,
+      font: 'sinko',
+      width: width() - 20,
+    }),
+    // color(220, 220, 255),
+    pos(width() - 150, height()/1.2),
+    origin("center")
+  ])
+  add([
+    text('PRESS BACKSPACE TO GO TO THE MENU', 
+    {
+      size: 10,
+      font: 'sinko',
+      width: width() - 20,
+    }),
+    // color(220, 220, 255),
+    pos(width() - 150, height()/1.1),
+    origin("center")
+  ])
+  onKeyPress(['enter', 'space'], () => {
     m.stop();
-    go('play', lvl)
+    go('play', lvl, chili)
+  })
+
+  onKeyPress(["backspace"],() => {
+    m.stop();
+    go('chooseChili')
   })
 })
 
@@ -524,7 +548,56 @@ scene('main', () => {
   ])
   onKeyPress(['enter', 'space'], () => {
     music.stop();
-    go('play', 1)
+    go('chooseChili')
+  })
+})
+
+scene('chooseChili', () => {
+  const m = play('choose', {volume: 0.2, loop: true,})
+  const CHAR_INFO = ["He's often called Red Chili", 'He comes from Mexico. ARRIBA!', 'Oh, what an elegant chili!'];
+  const CHAR_NAMES = ['Tabasco Pepper', 'Poblano Pepper', 'Mr. Tabasco']
+  const txt = add([
+    text('CHOOSE YOUR CHILI!', {
+      size: 40,
+      width: width() - 10,
+      font: 'sinko',
+    }),
+    pos(width()/2, height()/8),
+    origin('center'),
+    // color()
+  ]);
+
+  const chili = add([
+    sprite('icon', {frame: 0}),
+    scale(8),
+    origin('center'),
+    pos(width()/2, height()/2.5)
+  ])
+  const info = add([
+    text(CHAR_INFO[chili.frame], {size: 20, width: width() - 10, font: 'sinko'}),
+    pos(width()/2, 350),
+    origin('center'),
+  ])
+  const name = add([
+    text(CHAR_NAMES[chili.frame], {size: 40, width: width() - 10, font: 'sinko'}),
+    pos(width()/2, 280),
+    origin('center'),
+    color(240, 40, 40)
+  ])
+  onUpdate(() => {
+    info.text = CHAR_INFO[chili.frame];
+    name.text = CHAR_NAMES[chili.frame]
+  })
+
+  onKeyPress('left', () => {
+    chili.frame = chili.frame == 0 ? 2 : chili.frame -= 1;
+  })
+  onKeyPress('right', () => {
+    chili.frame = chili.frame == 2 ? 0 : chili.frame += 1;
+  })
+  onKeyPress('enter', () => {
+    m.stop();
+    go('play', 1, chili.frame);
   })
 })
 
