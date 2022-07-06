@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## Chili Party Update! (v0.1.2)
+### Added
+- 2 new playable characters: **Cold Chili** and **Habanero**.
+- **New feature**: Now you can make the chilis dance!
+- New sound: _chili dance_.
+**Released on**: [Itch.io](https://kenneyher.itch.io/chili-adventures-ece). \(6th/Jul/2022)\
+
+*__Note:__ This version will be released on replit when the kajam ends.*
+
 ## Version 0.1.1:
 ### Added
 - Add 2 new playable characters: **Poblano Pepper** and **Mr. Tabasco**.

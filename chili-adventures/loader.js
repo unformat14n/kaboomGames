@@ -1,35 +1,62 @@
 function loader () {
-  loadSprite('red_chili', "./sprites/red-chili.png", {
+  loadSprite('red_chili', "./sprites/red_chili_v2.png", {
     sliceX: Math.floor(4),
-    sliceY: Math.floor(4),
+    sliceY: Math.floor(5),
     anims: {
-      idle: {from: 3, to: 4, loop: true, speed: 2 },
-      run: {from: 5, to: 12, loop: true, speed: 13},
-      fall: 1,
-      hurt: 2,
-      death: 0,
+      dance: {from: 0, to: 3, loop: true, speed: 8},
+      idle: {from: 7, to: 8, loop: true, speed: 2 },
+      run: {from: 9, to: 16, loop: true, speed: 13},
+      fall: 5,
+      hurt: 6,
+      death: 4,
     }
   })
-  loadSprite('mr_chili', "./sprites/mr_chili.png", {
+  loadSprite('cold_chili', "./sprites/cold_chili.png", {
     sliceX: Math.floor(4),
-    sliceY: Math.floor(4),
+    sliceY: Math.floor(5),
     anims: {
-      idle: {from: 3, to: 4, loop: true, speed: 2 },
-      run: {from: 5, to: 12, loop: true, speed: 13},
-      fall: 1,
-      hurt: 2,
-      death: 0,
+      dance: {from: 0, to: 5, loop: true, speed: 8},
+      idle: {from: 9, to: 10, loop: true, speed: 2 },
+      run: {from: 11, to: 18, loop: true, speed: 13},
+      fall: 7,
+      hurt: 8,
+      death: 6,
     }
   })
-  loadSprite('g_chili', "./sprites/green-chili.png", {
+  loadSprite('habanero', "./sprites/habanero.png", {
     sliceX: Math.floor(4),
     sliceY: Math.floor(4),
     anims: {
-      idle: {from: 3, to: 4, loop: true, speed: 2 },
-      run: {from: 5, to: 12, loop: true, speed: 13},
-      fall: 1,
-      hurt: 2,
-      death: 0,
+      dance: {from: 0, to: 1, loop: true, speed: 5},
+      idle: {from: 5, to: 6, loop: true, speed: 2 },
+      run: {from: 7, to: 14, loop: true, speed: 13},
+      fall: 3,
+      hurt: 4,
+      death: 2,
+    }
+  })
+  loadSprite('mr_chili', "./sprites/mr_chili_v2.png", {
+    sliceX: Math.floor(4),
+    sliceY: Math.floor(5),
+    anims: {
+      dance: {from: 1, to: 3, loop: true, speed: 8},
+      idle: {from: 7, to: 8, loop: true, speed: 2 },
+      run: {from: 9, to: 16, loop: true, speed: 13},
+      fall: 5,
+      hurt: 6,
+      death: 4,
+    }
+  })
+  loadSprite('g_chili', "./sprites/green_chili_v2.png", {
+    sliceX: Math.floor(4),
+    sliceY: Math.floor(5),
+    anims: {
+      dance: {from: 1, to: 3, loop: true, speed: 8},
+      idle: {from: 7, to: 8, loop: true, speed: 2 },
+      run: {from: 9, to: 16, loop: true, speed: 13},
+      fall: 5,
+      hurt: 6,
+      death: 4,
     }
   })
   loadSprite('knife', "./sprites/knife.png", {
@@ -46,6 +73,7 @@ function loader () {
       idle: {from: 0, to: 1, loop: true, speed: 4},
     }
   })
+  
   loadSprite('bean', "./sprites/hungry-bean.png", {
     sliceX: Math.floor(2),
     sliceY: Math.floor(1),
@@ -77,9 +105,16 @@ function loader () {
       hide: {from: 5, to: 6}
     }
   })
-  loadSprite('icon', "./sprites/icons.png", {
-    sliceX: Math.floor(3),
+  loadSprite('icon', "./sprites/icons_v2.png", {
+    sliceX: Math.floor(5),
     sliceY: Math.floor(1),
+  })
+  loadSprite('disco', "./sprites/disco_ball.png", {
+    sliceX: Math.floor(4),
+    sliceY: Math.floor(3),
+    anims: {
+      idle: {from: 0, to: 11, loop: true,}
+    }
   })
   loadSprite('tile1', "./sprites/tile1.png")
   loadSprite('c1', "./sprites/cloud1.png")
@@ -96,7 +131,8 @@ function loader () {
   loadSprite('fire_thrower', "./sprites/fire_thrower.png");
 
 
-  loadSound('go', './sounds/game_over.wav')
+  loadSound('go', './sounds/game_over.wav');
+  loadSound('dance', './sounds/chili_dance.wav');
   loadSound('main', './sounds/poor_chili.wav')
   loadSound('choose', './sounds/time_for_a_spicy_food.wav')
   loadSound('lvl1', './sounds/mad-rush.wav')

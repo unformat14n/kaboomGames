@@ -94,7 +94,7 @@ const GAME = {
       4: [55, 65, 109],
     }
   },
-  chars: ['red_chili', 'g_chili', 'mr_chili'],
+  chars: ['red_chili', 'g_chili', 'mr_chili', 'cold_chili', 'habanero'],
   layers: ['bg', 'enviro', 'game', 'fx', 'ui'],
   lvl_opts: {
     width: 45,
@@ -314,7 +314,7 @@ scene('play', (lvl, chili) => {
   })
 
   onKeyDown('left', () => {
-    if(!player.hit && !player.death){
+    if(!player.hit && !player.death && !player.dance){
       player.run = true;
       player.move(-player.speed, 0);
       player.flipX(true);
@@ -322,7 +322,7 @@ scene('play', (lvl, chili) => {
     player.dir = -1;
   })
   onKeyDown('right', () => {
-    if(!player.hit && !player.death){
+    if(!player.hit && !player.death && !player.dance){
       player.run = true;
       player.move(player.speed, 0);
       player.flipX(false);
@@ -333,9 +333,28 @@ scene('play', (lvl, chili) => {
     player.run = false;
   })
   onKeyPress('space', () => {
-    if(player.grounded() && !player.death){
+    if(player.grounded() && !player.death && !player.dance && !player.hit){
       play('jump', {volume: 0.3});
       player.jump(player.jump_force);
+    }
+  })
+  onKeyPress('d', () => {
+    if(player.grounded() && !player.death && !player.hit && !player.dance){
+      const disco = add([
+        sprite('disco', {anim: 'idle'}),
+        pos(player.pos.x, player.pos.y - 50),
+        scale(2),
+        origin('center'),
+        layer('fx'),
+        lifespan(8.1, {fade: 0.1}),
+      ]);
+      // camScale(3);
+      // camPos(player.pos.x, player.pos.y - 10)
+      // music.volume = -1;
+      music.pause();
+      play('dance', {volume: 0.2, speed: 1})
+      player.dance = true;
+      wait(8, () => {music.play()})
     }
   })
 
@@ -403,6 +422,13 @@ scene('play', (lvl, chili) => {
         player.play('hurt');
         wait(0.35, () => player.hit = false);
         wait(1, () => player.invincibility = false)
+      }
+    }
+    else if(player.dance){
+      if(anim !== 'dance'){
+        player.play('dance');
+        wait(8, () => player.dance = false);
+        // wait(1, () => player.invincibility = false)
       }
     }
     else if(player.fall){
@@ -554,8 +580,8 @@ scene('main', () => {
 
 scene('chooseChili', () => {
   const m = play('choose', {volume: 0.2, loop: true,})
-  const CHAR_INFO = ["He's often called Red Chili", 'He comes from Mexico. ARRIBA!', 'Oh, what an elegant chili!'];
-  const CHAR_NAMES = ['Tabasco Pepper', 'Poblano Pepper', 'Mr. Tabasco']
+  const CHAR_INFO = ["He's often called Red Chili", 'He comes from Mexico. ARRIBA!', 'Oh, what an elegant chili!', "He just has a cold, but he's fine", "Ladies and Gentlemen! The hottest chili alive!"];
+  const CHAR_NAMES = ['Tabasco Pepper', 'Poblano Pepper', 'Mr. Tabasco', 'Cold Chili', 'Habanero']
   const txt = add([
     text('CHOOSE YOUR CHILI!', {
       size: 40,
@@ -590,10 +616,10 @@ scene('chooseChili', () => {
   })
 
   onKeyPress('left', () => {
-    chili.frame = chili.frame == 0 ? 2 : chili.frame -= 1;
+    chili.frame = chili.frame == 0 ? 4 : chili.frame -= 1;
   })
   onKeyPress('right', () => {
-    chili.frame = chili.frame == 2 ? 0 : chili.frame += 1;
+    chili.frame = chili.frame == 4 ? 0 : chili.frame += 1;
   })
   onKeyPress('enter', () => {
     m.stop();
