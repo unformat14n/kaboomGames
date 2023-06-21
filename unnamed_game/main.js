@@ -17,13 +17,96 @@ camScale(0.25)
 const player = add([
   sprite("cat", {anim: "base"}), 
   scale(1),
+  area(),
   pos(width()/2, height()/2),
   anchor("center"),
   {
     speed: 512,
-    aim: 0,
+    aim: 1,
   }
 ])
+
+player.onUpdate(() => {
+  // Set the viewport center to player.pos
+  camPos(player.pos)
+})
+
+const pointer = player.add([
+  sprite("pointer", {anim: "pointer"}),
+  anchor("center"),
+  scale(0.5),
+  pos(180, 50),
+  rotate(0),
+  {
+    translate: (player) => {
+      if(player.aim == 1){
+        return 0;
+      }
+      if(player.aim == 2){
+        return 45;
+      }
+      if(player.aim == 3){
+        return 315;
+      }
+      if(player.aim == 4){
+        return 270;
+      }
+      if(player.aim == 5){
+        return 90;
+      }
+      if(player.aim == -1){
+        return 180;
+      }
+      if(player.aim == -2){
+        return 135;
+      }
+      if(player.aim == -3){
+        return 225;
+      }
+    }
+  }
+])
+
+pointer.onUpdate(() => {
+  if(player.aim > 0){
+    if(player.aim == 2){
+      pointer.pos.x = 150;
+      pointer.pos.y = 150;
+      pointer.angle = 45;
+    }else if(player.aim == 3){
+      pointer.angle = -45;
+      pointer.pos.y = -50;
+      pointer.pos.x = 100;
+    } else if(player.aim == 4){
+      pointer.pos.x = 0;
+      pointer.pos.y = -90;
+      pointer.angle = -90;
+    } else if(player.aim == 5){
+      pointer.pos.x = 0;
+      pointer.pos.y = 150;
+      pointer.angle = 90;
+    } else {
+      pointer.pos.x = 180;
+      pointer.pos.y = 50;
+      pointer.angle = 0;
+    }
+  }else {
+    if(player.aim == -2){
+      pointer.pos.x = -150
+      pointer.pos.y = 150;
+      pointer.angle = -225;
+    }
+    else if(player.aim == -3){
+      pointer.pos.x = -100;
+      pointer.pos.y = -50;
+      pointer.angle = 225;
+    }else {
+      pointer.pos.x = -180;
+      pointer.pos.y = 50;
+      pointer.angle = 180;
+    }
+  }
+})
 
 onKeyPress("left", () => {
   player.flipX = true;
@@ -46,28 +129,47 @@ for (const dir in dirs) {
   })
 }
 
+onKeyPress("a", () => {
+  add([
+    sprite("cat_bullet", {anim: "idle"}),
+    scale(0.8),
+    pos(player.pos),
+    anchor("center"),
+    move(pointer.translate(player), 1800),
+    offscreen({ destroy: true })
+  ])
+})
+
+
 onUpdate(() => {
+  if(isKeyDown("up")){
+    player.aim = 4;
+  }
+  if(isKeyDown("down")){
+    player.aim = 5;
+  }
+
   if(isKeyDown("left")){
     if(isKeyDown("up")){
-      player.aim = 135;
+      player.aim = -3;
     }
     else if(isKeyDown("down")){
-      player.aim = 225;
+      player.aim = -2;
     }
     else {
-      player.aim = 180;
+      player.aim = -1;
     }
   }
 
   if(isKeyDown("right")){
     if(isKeyDown("up")){
-      player.aim = 45;
+      player.aim = 3;
     }
     else if(isKeyDown("down")){
-      player.aim = 315;
+      player.aim = 2;
     }
     else {
-      player.aim = 0;
+      player.aim = 1;
     }
   }
 
