@@ -12,12 +12,36 @@ kaboom({
 
 loader();
 
-camScale(0.25)
+camScale(0.25);
+
+const map = addLevel([
+  "=========",
+  "=       =",
+  "=       =",
+  "=       =",
+  "=       =",
+  "=       =",
+  "=       =",
+  "=       =",
+  "========="
+], {
+  tileWidth: 256,
+  tileHeight: 256,
+  tiles: {
+    "=": () => [
+      sprite("wall"),
+      body({isStatic: true}),
+      area(),
+      "wall",
+    ]
+  }
+})
 
 const player = add([
   sprite("cat", {anim: "base"}), 
   scale(1),
-  area(),
+  area({shape: new Polygon([vec2(0), vec2(125, 20), vec2(125, 100), vec2(0, 125), vec2(-50, 100), vec2(-50, 20)]) }),
+  body(),
   pos(width()/2, height()/2),
   anchor("center"),
   {
@@ -110,10 +134,12 @@ pointer.onUpdate(() => {
 
 onKeyPress("left", () => {
   player.flipX = true;
+  player.area.offset = vec2(-75, 0);
 })
 
 onKeyPress("right", () => {
   player.flipX = false;
+  player.area.offset = vec2(0, 0);
 })
 
 const dirs = {
@@ -133,13 +159,18 @@ onKeyPress("a", () => {
   add([
     sprite("cat_bullet", {anim: "idle"}),
     scale(0.8),
-    pos(player.pos),
+    pos(player.pos.x, player.pos.y + 35),
+    area({scale: 0.7}),
     anchor("center"),
     move(pointer.translate(player), 1800),
-    offscreen({ destroy: true })
+    offscreen({ destroy: true }),
+    "bullet"
   ])
 })
 
+onCollide("bullet", "wall", (b, w) => {
+  b.destroy();
+})
 
 onUpdate(() => {
   if(isKeyDown("up")){

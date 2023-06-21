@@ -26,6 +26,7 @@ function loader(){
       idle: {from: 0, to: 7, loop: true, speed: 15},
     }
   })
+  loadSprite("wall", "assets/sprites/wall.png");
 }
 
 export default loader;
