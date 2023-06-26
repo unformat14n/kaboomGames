@@ -14,16 +14,29 @@ loader();
 
 camScale(0.25);
 
+function createFX(type, p){
+  const fx = add([
+    sprite('fx', {anim: type}),
+    pos(p),
+    anchor('center'),
+  ])
+  fx.onAnimEnd((anim) => {
+    if(anim == "fire"){
+      fx.destroy();
+    }
+  })
+}
+
 const map = addLevel([
-  "=========",
-  "=       =",
-  "=       =",
-  "=       =",
-  "=       =",
-  "=       =",
-  "=       =",
-  "=       =",
-  "========="
+  "==================",
+  "=   f            =",
+  "=                =",
+  "=                =",
+  "=                =",
+  "=   i            =",
+  "=                =",
+  "=                =",
+  "=================="
 ], {
   tileWidth: 256,
   tileHeight: 256,
@@ -33,7 +46,21 @@ const map = addLevel([
       body({isStatic: true}),
       area(),
       "wall",
-    ]
+    ],
+    "f": () => [
+      sprite("power_ups", {anim: "fire"}),
+      // body({isStatic: true}),
+      area(),
+      "power_up",
+      "fire",
+    ],
+    "i": () => [
+      sprite("power_ups", {anim: "ice"}),
+      // body({isStatic: true}),
+      area(),
+      "power_up",
+      "ice",
+    ],
   }
 })
 
@@ -44,15 +71,35 @@ const player = add([
   body(),
   pos(width()/2, height()/2),
   anchor("center"),
+  "player",
   {
     speed: 512,
     aim: 1,
+    state: "base",
   }
 ])
 
+const handleAnims = () => {
+  const curAnim = player.curAnim();
+  if(player.state == "fire"){
+    if(curAnim !== "fire"){
+      player.play("fire");
+    }
+  }else if(player.state == "ice"){
+    if(curAnim !== "ice"){
+      player.play("ice");
+    }
+  }else {
+    if(curAnim !== "base"){
+      player.play("base");
+    }
+  }
+}
+
 player.onUpdate(() => {
+  handleAnims();
   // Set the viewport center to player.pos
-  camPos(player.pos)
+  camPos(player.pos);
 })
 
 const pointer = player.add([
@@ -157,7 +204,7 @@ for (const dir in dirs) {
 
 onKeyPress("a", () => {
   add([
-    sprite("cat_bullet", {anim: "idle"}),
+    sprite("atks", {anim: player.state}),
     scale(0.8),
     pos(player.pos.x, player.pos.y + 35),
     area({scale: 0.7}),
@@ -166,10 +213,42 @@ onKeyPress("a", () => {
     offscreen({ destroy: true }),
     "bullet"
   ])
+  if(player.state == "fire"){
+    add([
+      sprite("atks", {anim: player.state}),
+      scale(0.8),
+      pos(player.pos.x, player.pos.y + 35),
+      area({scale: 0.7}),
+      anchor("center"),
+      move(pointer.translate(player)+125, 1800),
+      offscreen({ destroy: true }),
+      "bullet"
+    ])
+    add([
+      sprite("atks", {anim: player.state}),
+      scale(0.8),
+      pos(player.pos.x, player.pos.y + 35),
+      area({scale: 0.7}),
+      anchor("center"),
+      move(pointer.translate(player)-125, 1800),
+      offscreen({ destroy: true }),
+      "bullet"
+    ])
+  }
 })
 
 onCollide("bullet", "wall", (b, w) => {
   b.destroy();
+})
+player.onCollide("power_up", (u) => {
+  if(u.is("fire")){
+    u.destroy();
+    player.state = "fire";
+    createFX("fire", player.pos);
+  }else {
+    u.destroy();
+    player.state = "ice";
+  }
 })
 
 onUpdate(() => {
