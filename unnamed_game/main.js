@@ -29,11 +29,11 @@ function createFX(type, p){
 
 const map = addLevel([
   "==================",
-  "=   f            =",
+  "=   f        f   =",
   "=                =",
   "=                =",
   "=                =",
-  "=   i            =",
+  "=   i        i   =",
   "=                =",
   "=                =",
   "=================="
@@ -205,32 +205,32 @@ for (const dir in dirs) {
 onKeyPress("a", () => {
   add([
     sprite("atks", {anim: player.state}),
-    scale(0.8),
+    scale(1 ),
     pos(player.pos.x, player.pos.y + 35),
     area({scale: 0.7}),
     anchor("center"),
-    move(pointer.translate(player), 1800),
+    move(pointer.translate(player), 2000),
     offscreen({ destroy: true }),
     "bullet"
   ])
   if(player.state == "fire"){
     add([
       sprite("atks", {anim: player.state}),
-      scale(0.8),
+      scale(1),
       pos(player.pos.x, player.pos.y + 35),
       area({scale: 0.7}),
       anchor("center"),
-      move(pointer.translate(player)+125, 1800),
+      move(pointer.translate(player)+125, 2000),
       offscreen({ destroy: true }),
       "bullet"
     ])
     add([
       sprite("atks", {anim: player.state}),
-      scale(0.8),
+      scale(1),
       pos(player.pos.x, player.pos.y + 35),
       area({scale: 0.7}),
       anchor("center"),
-      move(pointer.translate(player)-125, 1800),
+      move(pointer.translate(player)-125, 2000),
       offscreen({ destroy: true }),
       "bullet"
     ])
@@ -248,7 +248,40 @@ player.onCollide("power_up", (u) => {
   }else {
     u.destroy();
     player.state = "ice";
+    player.get("ball").forEach(b => {
+      b.pause = false;
+    })
   }
+})
+
+for(let i=1; i<=3; i++){
+  player.add([
+    sprite("ice_cat"),  
+    scale(2),
+    pos(0,0),
+    anchor("center"),
+    "ball",
+    {
+      time: i*2,
+      dir: 1,
+    }
+  ])
+}
+
+player.get("ball").forEach(b => {
+  // console.log("hello")
+  b.onUpdate(() => {
+    b.pos.x = wave(-480, 480, time() * 2 + b.time, Math.cos);
+    b.pos.y = wave(-480, 480, time() * 2 + b.time);
+    // console.log("hello");
+    if(player.state !== "ice"){
+      b.hidden = true;
+      b.pause = true;
+    }else {
+      b.hidden = false;
+      b.pause = false;
+    }
+ })
 })
 
 onUpdate(() => {

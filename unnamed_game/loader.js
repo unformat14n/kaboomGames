@@ -46,6 +46,7 @@ function loader(){
     }
   })
   loadSprite("wall", "assets/sprites/wall.png");
+  loadSprite("ice_cat", "assets/sprites/ice_cat.png");
 }
 
 export default loader;
