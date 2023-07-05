@@ -10,6 +10,14 @@ function loader(){
       ice: {from: 5, to: 6, loop: true, speed: 5},
     }
   });
+  loadSprite("ghost", "assets/sprites/ghost.png", {
+    sliceX: 2,
+    sliceY: 1,
+    anims: 
+    {
+      idle: {from: 0, to: 1, loop: true, speed: 5},
+    }
+  });
   loadSprite("pointer", "assets/sprites/pointer.png", {
     sliceX: 2,
     sliceY: 1,

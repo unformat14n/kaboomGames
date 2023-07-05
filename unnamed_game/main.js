@@ -5,7 +5,6 @@ kaboom({
   width: 1024,
   height: 512,
   crisp: true,
-  // canvas: document.getElementById('kaboom'),
   background: [20, 20, 40],
   global: true,
 });
@@ -23,14 +22,31 @@ function createFX(type, p) {
   });
 }
 
+const game = add([timer()]);
+const ui = add([fixed(), z(100)]);
+
+onKeyPress("escape", () => {
+  if (game.paused /*&& !menu.hidden*/) {
+    // music.paused = false;
+    game.paused = false;
+    // menu.paused = true;
+    // menu.hidden = true;
+  } else if (!game.paused /*&& menu.hidden*/) {
+    // music.paused = true;
+    game.paused = true;
+    // menu.paused = false;
+    // menu.hidden = false;
+  }
+});
+
 const map = addLevel(
   [
     "==================",
-    "=   f        f   =",
     "=                =",
     "=                =",
+    "=            g   =",
     "=                =",
-    "=   i        i   =",
+    "=                =",
     "=                =",
     "=                =",
     "==================",
@@ -42,23 +58,38 @@ const map = addLevel(
       "=": () => [sprite("wall"), body({ isStatic: true }), area(), "wall"],
       f: () => [
         sprite("power_ups", { anim: "fire" }),
-        // body({isStatic: true}),
         area(),
         "power_up",
         "fire",
       ],
       i: () => [
         sprite("power_ups", { anim: "ice" }),
-        // body({isStatic: true}),
         area(),
         "power_up",
         "ice",
+      ],
+      g: () => [
+        sprite("ghost", {anim: "idle"}),
+        anchor("center"),
+        scale(),
+        rotate(0),
+        area({ scale: 0.8 }),
+        state("idle"),
+        health(100),
+        timer(),
+        color(),
+        // bounce(),
+        // enemy({ dmg: 50 }),
+        "minion",
+        {
+          playerDist: {x: 0, y: 0},
+        }
       ],
     },
   }
 );
 
-const player = add([
+const player = game.add([
   sprite("cat", { anim: "base" }),
   scale(1),
   area({
@@ -81,6 +112,60 @@ const player = add([
     state: "base",
   },
 ]);
+
+map.get("minion").forEach((btfly) => {
+  // console.log("hello")
+  btfly.onUpdate(() => {
+    btfly.pos.x += dt() * rand(-1, 1) * 100;
+    btfly.pos.y += dt() * rand(-1, 1) * 100;
+    btfly.playerDist = btfly.pos.dist(player.pos);
+  });
+  btfly.onStateUpdate("idle", async () => {
+    if(btfly.playerDist < 2048){
+      // await wait(2);
+      if (btfly.state !== "idle") return;
+      btfly.enterState("prepare");
+      // console.log('ho!')
+    }
+  });
+  btfly.onStateEnter("prepare", async () => {
+    await wait(3);
+    if (btfly.state !== "prepare") return;
+    btfly.enterState("attack");
+  })
+  btfly.onStateEnter("attack", async () => {
+    const dir = player.pos.sub(btfly.pos).unit();
+    const dest = player.pos.add(dir.scale(500));
+    console.log(player.pos.dist(btfly.pos));
+    const dis = player.pos.dist(btfly.pos);
+    // if(dis < 1024){
+      const t = dis / 1024;
+      // k.play("wooosh", {
+      //   detune: rand(-300, 300),
+      //   volume: Math.min(1, 320 / dis),
+      // })
+      await btfly.tween(
+        btfly.pos,
+        dest,
+        t,
+        (p) => (btfly.pos = p),
+        easings.easeInOutQuad
+      );
+      btfly.enterState("idle");
+    // }
+  });
+  btfly.onStateEnter("dizzy", async () => {
+    await btfly.wait(2);
+    if (btfly.state !== "dizzy") return;
+    btfly.enterState("idle");
+  });
+  btfly.onStateUpdate("dizzy", async () => {
+    btfly.angle += dt() * DIZZY_SPEED;
+  });
+  btfly.onStateEnd("dizzy", async () => {
+    btfly.angle = 0;
+  });
+});
 
 const handleAnims = () => {
   const curAnim = player.curAnim();
@@ -182,6 +267,7 @@ pointer.onUpdate(() => {
 });
 
 onKeyPress("left", () => {
+  if (game.paused) return;
   player.flipX = true;
   player.area.offset = vec2(-75, 0);
 });
@@ -198,14 +284,31 @@ const dirs = {
   down: DOWN,
 };
 
+const evs = [];
+
+game.onDestroy(() => {
+  evs.forEach((ev) => ev.cancel());
+});
+
 for (const dir in dirs) {
-  onKeyDown(dir, () => {
-    player.move(dirs[dir].scale(player.speed));
-  });
+  evs.push(
+    onKeyDown(dir, () => {
+      if (game.paused) return;
+      player.move(dirs[dir].scale(500));
+      // const xMin = player.width / 2
+      // const yMin = player.height / 2
+      // const xMax = WIDTH - player.width / 2
+      // const yMax = HEIGHT - player.height / 2
+      // if (player.pos.x < xMin) player.pos.x = xMin
+      // if (player.pos.y < yMin) player.pos.y = yMin
+      // if (player.pos.x > xMax) player.pos.x = xMax
+      // if (player.pos.y > yMax) player.pos.y = yMax
+    })
+  );
 }
 
 onKeyPress("a", () => {
-  add([
+  game.add([
     sprite("atks", { anim: player.state }),
     scale(1),
     pos(player.pos.x, player.pos.y + 35),
@@ -216,7 +319,7 @@ onKeyPress("a", () => {
     "bullet",
   ]);
   if (player.state == "fire") {
-    add([
+    game.add([
       sprite("atks", { anim: player.state }),
       scale(1),
       pos(player.pos.x, player.pos.y + 35),
@@ -226,7 +329,7 @@ onKeyPress("a", () => {
       offscreen({ destroy: true }),
       "bullet",
     ]);
-    add([
+    game.add([
       sprite("atks", { anim: player.state }),
       scale(1),
       pos(player.pos.x, player.pos.y + 35),
