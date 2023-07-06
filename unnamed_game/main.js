@@ -25,20 +25,6 @@ function createFX(type, p) {
 const game = add([timer()]);
 const ui = add([fixed(), z(100)]);
 
-onKeyPress("escape", () => {
-  if (game.paused /*&& !menu.hidden*/) {
-    // music.paused = false;
-    game.paused = false;
-    // menu.paused = true;
-    // menu.hidden = true;
-  } else if (!game.paused /*&& menu.hidden*/) {
-    // music.paused = true;
-    game.paused = true;
-    // menu.paused = false;
-    // menu.hidden = false;
-  }
-});
-
 const map = addLevel(
   [
     "==================",
@@ -80,7 +66,8 @@ const map = addLevel(
         color(),
         // bounce(),
         // enemy({ dmg: 50 }),
-        "minion",
+        "enemy",
+        "ghost",
         {
           playerDist: {x: 0, y: 0},
         }
@@ -88,6 +75,22 @@ const map = addLevel(
     },
   }
 );
+
+onKeyPress("escape", () => {
+  if (game.paused /*&& !menu.hidden*/) {
+    // music.paused = false;
+    game.paused = false;
+    map.paused = false;
+    // menu.paused = true;
+    // menu.hidden = true;
+  } else if (!game.paused /*&& menu.hidden*/) {
+    // music.paused = true;
+    game.paused = true;
+    map.paused = true;
+    // menu.paused = false;
+    // menu.hidden = false;
+  }
+});
 
 const player = game.add([
   sprite("cat", { anim: "base" }),
@@ -105,75 +108,88 @@ const player = game.add([
   body(),
   pos(width() / 2, height() / 2),
   anchor("center"),
+  state("normal"),
+  health(100),
   "player",
   {
     speed: 512,
     aim: 1,
-    state: "base",
+    mode: "base",
+    blinking: false,
   },
 ]);
 
-map.get("minion").forEach((btfly) => {
-  // console.log("hello")
-  btfly.onUpdate(() => {
-    btfly.pos.x += dt() * rand(-1, 1) * 100;
-    btfly.pos.y += dt() * rand(-1, 1) * 100;
-    btfly.playerDist = btfly.pos.dist(player.pos);
+player.onStateEnter("blinking", async () => {
+  player.blinking = true;
+  for(let i=0; i<4; i++){
+    player.opacity = 0;
+    await wait(0.1);
+    player.opacity = 1;
+    await wait(0.15);
+  }
+  player.blinking = false;
+  player.enterState("normal");
+})
+
+map.get("ghost").forEach((g) => {
+  g.onUpdate(() => {
+    g.pos.x += dt() * rand(-1, 1) * 100;
+    g.pos.y += dt() * rand(-1, 1) * 100;
+    g.playerDist = g.pos.dist(player.pos);
   });
-  btfly.onStateUpdate("idle", async () => {
-    if(btfly.playerDist < 2048){
-      // await wait(2);
-      if (btfly.state !== "idle") return;
-      btfly.enterState("prepare");
-      // console.log('ho!')
+  g.onDeath(() => {
+    addKaboom(g.pos, {scale: 2});
+    g.destroy();
+  })
+  g.onStateUpdate("idle", () => {
+    if(g.playerDist < 2048){
+      if (g.state !== "idle") return;
+      g.enterState("prepare");
     }
   });
-  btfly.onStateEnter("prepare", async () => {
-    await wait(3);
-    if (btfly.state !== "prepare") return;
-    btfly.enterState("attack");
+  g.onStateEnter("prepare", async () => {
+    await wait(1.5);
+    if (g.state !== "prepare") return;
+    g.enterState("attack");
   })
-  btfly.onStateEnter("attack", async () => {
-    const dir = player.pos.sub(btfly.pos).unit();
+  g.onStateEnter("attack", async () => {
+    const dir = player.pos.sub(g.pos).unit();
     const dest = player.pos.add(dir.scale(500));
-    console.log(player.pos.dist(btfly.pos));
-    const dis = player.pos.dist(btfly.pos);
-    // if(dis < 1024){
-      const t = dis / 1024;
-      // k.play("wooosh", {
-      //   detune: rand(-300, 300),
-      //   volume: Math.min(1, 320 / dis),
-      // })
-      await btfly.tween(
-        btfly.pos,
-        dest,
-        t,
-        (p) => (btfly.pos = p),
-        easings.easeInOutQuad
-      );
-      btfly.enterState("idle");
-    // }
+    const dis = player.pos.dist(g.pos);
+    const t = dis / 1024;
+    // k.play("wooosh", {
+    //   detune: rand(-300, 300),
+    //   volume: Math.min(1, 320 / dis),
+    // })
+    await g.tween(
+      g.pos,
+      dest,
+      t,
+      (p) => (g.pos = p),
+      easings.easeInOutQuad
+    );
+    g.enterState("idle");
   });
-  btfly.onStateEnter("dizzy", async () => {
-    await btfly.wait(2);
-    if (btfly.state !== "dizzy") return;
-    btfly.enterState("idle");
+  g.onStateEnter("dizzy", async () => {
+    await g.wait(2);
+    if (g.state !== "dizzy") return;
+    g.enterState("idle");
   });
-  btfly.onStateUpdate("dizzy", async () => {
-    btfly.angle += dt() * DIZZY_SPEED;
+  g.onStateUpdate("dizzy", async () => {
+    g.angle += dt() * DIZZY_SPEED;
   });
-  btfly.onStateEnd("dizzy", async () => {
-    btfly.angle = 0;
+  g.onStateEnd("dizzy", async () => {
+    g.angle = 0;
   });
 });
 
 const handleAnims = () => {
   const curAnim = player.curAnim();
-  if (player.state == "fire") {
+  if (player.mode == "fire") {
     if (curAnim !== "fire") {
       player.play("fire");
     }
-  } else if (player.state == "ice") {
+  } else if (player.mode == "ice") {
     if (curAnim !== "ice") {
       player.play("ice");
     }
@@ -186,6 +202,7 @@ const handleAnims = () => {
 
 player.onUpdate(() => {
   handleAnims();
+
   // Set the viewport center to player.pos
   camPos(player.pos);
 });
@@ -273,6 +290,7 @@ onKeyPress("left", () => {
 });
 
 onKeyPress("right", () => {
+  if (game.paused) return;
   player.flipX = false;
   player.area.offset = vec2(0, 0);
 });
@@ -295,21 +313,13 @@ for (const dir in dirs) {
     onKeyDown(dir, () => {
       if (game.paused) return;
       player.move(dirs[dir].scale(500));
-      // const xMin = player.width / 2
-      // const yMin = player.height / 2
-      // const xMax = WIDTH - player.width / 2
-      // const yMax = HEIGHT - player.height / 2
-      // if (player.pos.x < xMin) player.pos.x = xMin
-      // if (player.pos.y < yMin) player.pos.y = yMin
-      // if (player.pos.x > xMax) player.pos.x = xMax
-      // if (player.pos.y > yMax) player.pos.y = yMax
     })
   );
 }
 
 onKeyPress("a", () => {
   game.add([
-    sprite("atks", { anim: player.state }),
+    sprite("atks", { anim: player.mode }),
     scale(1),
     pos(player.pos.x, player.pos.y + 35),
     area({ scale: 0.7 }),
@@ -318,9 +328,9 @@ onKeyPress("a", () => {
     offscreen({ destroy: true }),
     "bullet",
   ]);
-  if (player.state == "fire") {
+  if (player.mode == "fire") {
     game.add([
-      sprite("atks", { anim: player.state }),
+      sprite("atks", { anim: player.mode }),
       scale(1),
       pos(player.pos.x, player.pos.y + 35),
       area({ scale: 0.7 }),
@@ -330,7 +340,7 @@ onKeyPress("a", () => {
       "bullet",
     ]);
     game.add([
-      sprite("atks", { anim: player.state }),
+      sprite("atks", { anim: player.mode }),
       scale(1),
       pos(player.pos.x, player.pos.y + 35),
       area({ scale: 0.7 }),
@@ -342,22 +352,37 @@ onKeyPress("a", () => {
   }
 });
 
+
+
 onCollide("bullet", "wall", (b, w) => {
   b.destroy();
 });
+onCollide("bullet", "enemy", (b, e) => {
+  e.hurt(player.mode == "fire" ? 10 : 5);
+  // console.log(e.hp());
+  b.destroy();
+})
+
 player.onCollide("power_up", (u) => {
   if (u.is("fire")) {
     u.destroy();
-    player.state = "fire";
+    player.mode = "fire";
     createFX("fire", player.pos);
   } else {
     u.destroy();
-    player.state = "ice";
+    player.mode = "ice";
     player.get("shield").forEach((b) => {
       b.pause = false;
     });
   }
 });
+player.onCollide("enemy", (e) => {
+  if(player.blinking) return;
+  player.hurt(5);
+  player.enterState("blinking");
+  console.log(player.hp())
+})
+
 
 for (let i = 1; i <= 3; i++) {
   player.add([
@@ -378,7 +403,7 @@ player.get("shield").forEach((s) => {
     s.pos.x = wave(-480, 480, time() * 2 + s.offset, Math.cos);
     s.pos.y = wave(-480, 480, time() * 2 + s.offset);
     // console.log("hello");
-    if (player.state !== "ice") {
+    if (player.mode !== "ice") {
       s.hidden = true;
       s.pause = true;
     } else {
