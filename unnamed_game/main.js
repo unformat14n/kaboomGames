@@ -1,12 +1,14 @@
 import kaboom from "https://unpkg.com/kaboom@3000.0.1/dist/kaboom.mjs";
 import loader from "./loader.js";
+import maps from "./maps.js";
 
-kaboom({
-  width: 1024,
-  height: 512,
+const k = kaboom({
   crisp: true,
   background: [20, 20, 40],
   global: true,
+  debug: true,
+  canvas: document.querySelector('#kaboom'),
+  degub: true,
 });
 
 loader();
@@ -25,18 +27,7 @@ function createFX(type, p) {
 const game = add([timer()]);
 const ui = add([fixed(), z(100)]);
 
-const map = addLevel(
-  [
-    "==================",
-    "=                =",
-    "=                =",
-    "=            g   =",
-    "=                =",
-    "=                =",
-    "=                =",
-    "=                =",
-    "==================",
-  ],
+const map = addLevel(maps["1"],
   {
     tileWidth: 256,
     tileHeight: 256,
@@ -55,7 +46,7 @@ const map = addLevel(
         "ice",
       ],
       g: () => [
-        sprite("ghost", {anim: "idle"}),
+        sprite("enemies", {anim: "ghost"}),
         anchor("center"),
         scale(),
         rotate(0),
@@ -63,11 +54,26 @@ const map = addLevel(
         state("idle"),
         health(100),
         timer(),
+        "enemy",
+        "ghost",
+        {
+          playerDist: {x: 0, y: 0},
+        }
+      ],
+      s: () => [
+        sprite("enemies", {anim: "skull"}),
+        anchor("center"),
+        scale(),
+        rotate(0),
+        area({ scale: 0.8 }),
+        state("move"),
+        health(100),
+        timer(),
         color(),
         // bounce(),
         // enemy({ dmg: 50 }),
         "enemy",
-        "ghost",
+        "skull",
         {
           playerDist: {x: 0, y: 0},
         }
@@ -112,7 +118,7 @@ const player = game.add([
   health(100),
   "player",
   {
-    speed: 512,
+    speed: 600,
     aim: 1,
     mode: "base",
     blinking: false,
@@ -131,6 +137,11 @@ player.onStateEnter("blinking", async () => {
   player.enterState("normal");
 })
 
+onResize(() => {
+  k.width = window.innerWidth;
+  k.height = window.innerHeight;
+})
+
 map.get("ghost").forEach((g) => {
   g.onUpdate(() => {
     g.pos.x += dt() * rand(-1, 1) * 100;
@@ -142,8 +153,9 @@ map.get("ghost").forEach((g) => {
     g.destroy();
   })
   g.onStateUpdate("idle", () => {
-    if(g.playerDist < 2048){
+    if(g.playerDist < 1200){
       if (g.state !== "idle") return;
+      // console.log('hi')
       g.enterState("prepare");
     }
   });
@@ -170,17 +182,24 @@ map.get("ghost").forEach((g) => {
     );
     g.enterState("idle");
   });
-  g.onStateEnter("dizzy", async () => {
-    await g.wait(2);
-    if (g.state !== "dizzy") return;
-    g.enterState("idle");
+});
+
+map.get("skull").forEach((s) => {
+  s.onUpdate(() => {
+    // s.pos.x += dt() * rand(-1, 1) * 100;
+    // s.pos.y += dt() * rand(-1, 1) * 100;
+    s.playerDist = s.pos.dist(player.pos);
   });
-  g.onStateUpdate("dizzy", async () => {
-    g.angle += dt() * DIZZY_SPEED;
-  });
-  g.onStateEnd("dizzy", async () => {
-    g.angle = 0;
-  });
+  s.onDeath(() => {
+    addKaboom(s.pos, {scale: 2});
+    s.destroy();
+  })
+  s.onStateUpdate("move", () => {
+    if(s.playerDist < 2048){
+      const dir = player.pos.sub(s.pos).unit()
+			s.move(dir.scale(512))
+    }
+  })
 });
 
 const handleAnims = () => {
@@ -295,6 +314,26 @@ onKeyPress("right", () => {
   player.area.offset = vec2(0, 0);
 });
 
+const aimDirs = {
+  a: -1,
+  q: -3,
+  z: -2,
+  w: 4,
+  x: 5,
+  e: 3,
+  d: 1,
+  c: 2,
+}
+
+for(const aim in aimDirs){
+  onKeyPress(aim, () => {
+    if (game.paused) return;
+    console.log(aim);
+    // if(player.isColliding("wall")) return;
+    player.aim = aimDirs[aim];
+  })
+}
+
 const dirs = {
   left: LEFT,
   right: RIGHT,
@@ -312,12 +351,13 @@ for (const dir in dirs) {
   evs.push(
     onKeyDown(dir, () => {
       if (game.paused) return;
-      player.move(dirs[dir].scale(500));
+      if(player.isColliding("wall")) return;
+      player.move(dirs[dir].scale(player.speed));
     })
   );
 }
 
-onKeyPress("a", () => {
+onKeyPress("s", () => {
   game.add([
     sprite("atks", { anim: player.mode }),
     scale(1),
@@ -362,6 +402,12 @@ onCollide("bullet", "enemy", (b, e) => {
   // console.log(e.hp());
   b.destroy();
 })
+onCollide("shield", "enemy", (s, e) => {
+  if(player.mode == "ice"){
+    e.hurt(10);
+    console.log(e.hp())
+  }
+})
 
 player.onCollide("power_up", (u) => {
   if (u.is("fire")) {
@@ -379,16 +425,20 @@ player.onCollide("power_up", (u) => {
 player.onCollide("enemy", (e) => {
   if(player.blinking) return;
   player.hurt(5);
-  player.enterState("blinking");
-  console.log(player.hp())
+  // console.log(player.hp())
 })
 
+player.onHurt(() => {
+  player.enterState("blinking");
+  player.mode = "base";
+})
 
 for (let i = 1; i <= 3; i++) {
   player.add([
     sprite("ice_cat"),
     scale(2),
     pos(0, 0),
+    area(),
     anchor("center"),
     "shield",
     {
@@ -414,30 +464,30 @@ player.get("shield").forEach((s) => {
 });
 
 onUpdate(() => {
-  if (isKeyDown("up")) {
-    player.aim = 4;
-  }
-  if (isKeyDown("down")) {
-    player.aim = 5;
-  }
+  // if (isKeyDown("up")) {
+  //   player.aim = 4;
+  // }
+  // if (isKeyDown("down")) {
+  //   player.aim = 5;
+  // }
 
-  if (isKeyDown("left")) {
-    if (isKeyDown("up")) {
-      player.aim = -3;
-    } else if (isKeyDown("down")) {
-      player.aim = -2;
-    } else {
-      player.aim = -1;
-    }
-  }
+  // if (isKeyDown("left")) {
+  //   if (isKeyDown("up")) {
+  //     player.aim = -3;
+  //   } else if (isKeyDown("down")) {
+  //     player.aim = -2;
+  //   } else {
+  //     player.aim = -1;
+  //   }
+  // }
 
-  if (isKeyDown("right")) {
-    if (isKeyDown("up")) {
-      player.aim = 3;
-    } else if (isKeyDown("down")) {
-      player.aim = 2;
-    } else {
-      player.aim = 1;
-    }
-  }
+  // if (isKeyDown("right")) {
+  //   if (isKeyDown("up")) {
+  //     player.aim = 3;
+  //   } else if (isKeyDown("down")) {
+  //     player.aim = 2;
+  //   } else {
+  //     player.aim = 1;
+  //   }
+  // }
 });
